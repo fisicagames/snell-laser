@@ -3,6 +3,8 @@ import { IModel } from "./IModel";
 import { SoundModel } from "./SoundModel";
 import { GroundModel } from "./GroundModel";
 import { MirrorModel } from "./MirrorModel";
+import { LaserModel } from "./LaserModel";
+import { TargetModel } from "./TargetModel";
 
 export class Model implements IModel {
     private scene: Scene;
@@ -16,7 +18,9 @@ export class Model implements IModel {
     public updateModels: boolean = false;
 
     private groundModel!: GroundModel;
-    private mirrors: MirrorModel[] =[];
+    private mirrors: MirrorModel[] = [];
+    private targets: TargetModel[] = [];
+    private laserModel!: LaserModel;
 
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
         this.scene = scene;
@@ -26,22 +30,33 @@ export class Model implements IModel {
 
         //Start scene construction:
         this.groundModel = new GroundModel(this.scene, 16, 32);
+        this.laserModel = new LaserModel(this.scene, 0, -12, -Math.PI / 2);
+        this.targets.push(new TargetModel(this.scene, 0, 0, 12));
         this.createMirrors();
-
         this.updateSceneModels();
-      
     }
 
     private createMirrors(): void {
-        const defs =[
-            { x: -1, z: 0, ry: Math.PI / 5 },
-            { x: -1, z: 5, ry: Math.PI / 5 },
-            { x:  5, z: 2, ry: Math.PI / 3 },
+        const defs = [
+            { x: 0, z: -4, ry: Math.PI / 4 },
+            { x: -5, z: -4, ry: -Math.PI / 4 },
+            { x: -5, z: 6, ry: -Math.PI / 4 },
         ];
+
         defs.forEach((def, index) => {
             this.mirrors.push(new MirrorModel(this.scene, index, def.x, def.z, def.ry));
         });
     }
+
+    public getTargets(): TargetModel[] {
+        return this.targets;
+    }
+
+    public getMirrors(): MirrorModel[] {
+        return this.mirrors;
+    }
+
+
     private startMusic() {
         //TODO: [X]: Setup the music soundtrack:
         //https://pixabay.com/music/video-games-8-bit-arcade-mode-158814/
@@ -91,7 +106,7 @@ export class Model implements IModel {
 
     }
 
-    
+
     public resetGame() {
         this.updateModels = false;
         console.log("reset Game");
