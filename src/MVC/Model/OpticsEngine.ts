@@ -22,7 +22,7 @@ export class OpticsEngine {
 
     // Cores
     private readonly BEAM_LASER = new Color3(1.0, 0.06, 0.06);
-    private readonly BEAM_SPLIT = new Color3(1.0, 0.90, 0.10);
+    private readonly BEAM_SPLIT = new Color3(0.80, 0.20, 0.20);
     private readonly ARROW_COL = new Color3(1.0, 0.55, 0.15);
     private readonly PHOT_COL = new Color3(1.0, 0.65, 0.65);
     private readonly PHOT_SPLIT = new Color3(1.0, 0.95, 0.55);
