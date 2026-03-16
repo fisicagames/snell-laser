@@ -5,6 +5,8 @@ import { GroundModel } from "./GroundModel";
 import { MirrorModel } from "./MirrorModel";
 import { LaserModel } from "./LaserModel";
 import { TargetModel } from "./TargetModel";
+import { SplitterModel } from "./SplitterModel";
+import { GlassModel } from "./GlassModel";
 
 export class Model implements IModel {
     private scene: Scene;
@@ -21,6 +23,8 @@ export class Model implements IModel {
     private mirrors: MirrorModel[] = [];
     private targets: TargetModel[] = [];
     private laserModel!: LaserModel;
+    private splitters: SplitterModel[] = [];
+    private glasses: GlassModel[] =[];
 
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
         this.scene = scene;
@@ -32,6 +36,9 @@ export class Model implements IModel {
         this.groundModel = new GroundModel(this.scene, 16, 32);
         this.laserModel = new LaserModel(this.scene, 0, -12, -Math.PI / 2);
         this.targets.push(new TargetModel(this.scene, 0, 0, 12));
+        this.splitters.push(new SplitterModel(this.scene, 0, 0, 0, Math.PI / 4));
+        this.glasses.push(new GlassModel(this.scene, 0, { x0: -3, x1: 3, z0: 4, z1: 6 }, 1.5));
+
         this.createMirrors();
         this.updateSceneModels();
     }
