@@ -1,127 +1,125 @@
-import { Scene, Vector3, Mesh, FollowCamera, KeyboardEventTypes } from "@babylonjs/core";
+import { Scene, KeyboardEventTypes } from "@babylonjs/core";
 import { IModel } from "../Model/IModel";
 import { IView } from "../View/IView";
-import { CameraController } from "./CameraController";
 import { InputKeyboardController } from "./InputKeyboardController";
+
+// Tipagem auxiliar para garantir que o Controller possa interagir com qualquer peça que gire e brilhe
+type InteractableElement = {
+    rotationY: number;
+    setHighlight(isHighlighted: boolean): void;
+};
 
 export class Controller {
     private scene: Scene;
     private model: IModel;
     private view: IView;
-    private followCamera: FollowCamera;
-    private followCameraTarget: Mesh | null = null;
     private inputKeyboardControllers: InputKeyboardController;
-    private score: number = 0;
-    private coins: number = 9;
 
-
-    private isUpPressed: boolean = false;
-    private isDownPressed: boolean = false;
-    private isLeftPressed: boolean = false;
-    private isRightPressed: boolean = false;
+    // Índice da peça atualmente selecionada (Espelho ou Splitter)
+    private activeElementIndex: number = 0;
 
     constructor(scene: Scene, model: IModel, view: IView) {
         this.scene = scene;
         this.model = model;
         this.view = view;
 
-        this.followCamera = this.scene.activeCamera as FollowCamera;
-
-        this.model.setScoreUpdateCallback((newScore: number, state: string, work: number) => {
-            if (Math.abs(newScore) < 50) {
-                this.score += newScore;
-            }
-            this.view.updateScoreText(this.score, state, work)
-        });
-
-        this.model.setEndGameCallback((isVisible: boolean) => this.showEndGamePanel(isVisible));
-
         this.inputKeyboardControllers = new InputKeyboardController(scene);
         this.inputKeyboardControllerSetup();
+        
+        // Mantém os eventos de UI amarrados para não quebrar a compilação
         this.inputTouchControllerSetup();
 
+        // Destaca a primeira peça assim que o jogo começa
+        this.highlightActiveElement();
+    }
 
-        this.update();
-
+    // Pega todos os espelhos e divisores do Model e os junta numa lista única
+    private getInteractables(): InteractableElement[] {
+        return [...this.model.getMirrors(), ...this.model.getSplitters()];
     }
 
     private inputKeyboardControllerSetup() {
         this.inputKeyboardControllers.bindKeyboardEvents({
-            "w": (eventType) => { this.handleKeyPress(eventType, "w"); },
-            "arrowup": (eventType) => { this.handleKeyPress(eventType, "arrowup"); },
+            // Seleção de Peças
+            "arrowup":   (eventType) => { this.handleSelection(eventType, 1); },
+            "arrowdown": (eventType) => { this.handleSelection(eventType, -1); },
+            "w":         (eventType) => { this.handleSelection(eventType, 1); },
+            "s":         (eventType) => { this.handleSelection(eventType, -1); },
+
+            // Rotação de Peças
+            "arrowleft":  (eventType) => { this.handleRotation(eventType, -1); },
+            "arrowright": (eventType) => { this.handleRotation(eventType, 1); },
+            "q":          (eventType) => { this.handleRotation(eventType, -1); },
+            "e":          (eventType) => { this.handleRotation(eventType, 1); },
         });
     }
 
-    private handleKeyPress(eventType: KeyboardEventTypes, key: string) {
+    private handleSelection(eventType: KeyboardEventTypes, direction: number) {
+        // Dispara apenas quando a tecla é pressionada (evita pular várias vezes rápido demais)
         if (eventType === KeyboardEventTypes.KEYDOWN) {
-            if (key === "w" || key === "arrowup") {
-                //console.log(`Key ${key} pressed down`);
-            }
-        } else if (eventType === KeyboardEventTypes.KEYUP) {
-            if (key === "w" || key === "arrowup") {
-                //console.log(`Key ${key} released`);
+            const interactables = this.getInteractables();
+            if (interactables.length === 0) return;
+
+            // Remove o brilho da peça atual
+            interactables[this.activeElementIndex].setHighlight(false);
+
+            // Calcula o novo índice fazendo um loop (se passar do último, volta pro primeiro)
+            const total = interactables.length;
+            this.activeElementIndex = (this.activeElementIndex + direction + total) % total;
+
+            // Adiciona o brilho na nova peça selecionada
+            this.highlightActiveElement();
+        }
+    }
+
+    private handleRotation(eventType: KeyboardEventTypes, direction: number) {
+        // Permitimos girar continuamente enquanto a tecla estiver sendo segurada
+        if (eventType === KeyboardEventTypes.KEYDOWN) {
+            const interactables = this.getInteractables();
+            if (interactables.length > 0) {
+                const active = interactables[this.activeElementIndex];
+                
+                // Rotaciona (0.024 é uma velocidade suave por frame)
+                active.rotationY += direction * 0.024; 
+                
+                // Avisa o Model que a peça moveu para que a OpticsEngine recalcule os lasers!
+                this.model.triggerRecalculation();
             }
         }
     }
 
-    private update() {
-        this.scene.onBeforeRenderObservable.add(() => {
-            this.updateCameraPosition();
-        });
+    private highlightActiveElement() {
+        const interactables = this.getInteractables();
+        if (interactables.length > 0) {
+            interactables[this.activeElementIndex].setHighlight(true);
+        }
     }
-    private inputTouchControllerSetup() {
 
+    // ══════════════════════════════════════════════════════════════════════
+    //  MÉTODOS DE UI (Mantidos para a View não quebrar, mas limpos por dentro)
+    // ══════════════════════════════════════════════════════════════════════
+    private inputTouchControllerSetup() {
         this.view.onButtonMenuStartA(() => this.startGame());
-        this.view.onButtonMenuStartB(() => this.startGameLinear());
+        this.view.onButtonMenuStartB(() => this.startGame());
         this.view.onButtonMenuStartC(() => this.startGame());
         this.view.onButtonMenuContinuar(() => this.continueGame());
         this.view.onButtonMenu(() => this.showMenu());
         this.view.onToggleMusic(() => this.toggleMusic());
         this.view.onButtonLang(() => this.changeLanguage());
-        this.view.buttonUpDown(() => {
-            if (this.coins >= 1) {
-                --this.coins;                
-                if (this.coins == 8) {
-                    this.score = 0;
-                    this.model.updateModels = true;
-                }
-            }
-        });
-        //this.view.onButtonUpUp(() => { });
+        
+        // Setups vazios para os botões virtuais que antes eram do jogo antigo
+        this.view.buttonUpDown(() => {});
         this.view.setButtonUpUpCallback(() => null);
-
-    }
-
-    public setCameraTarget(target: Vector3 | Mesh): void {
-        if (target instanceof Mesh) {
-            this.followCameraTarget = target;
-        } else if (target instanceof Vector3) {
-            this.followCamera.lockedTarget = null;
-            this.followCamera.setTarget(target);
-        }
-    }
-
-    private updateCameraPosition(): void {
-        if (this.followCameraTarget && this.followCamera) {
-            CameraController.updatePosition(this.followCamera, this.followCameraTarget);
-        }
     }
 
     private startGame(): void {
-        //TODO: Mudar para view:
-        this.coins = 9;
-        this.view.changeButtonUPSymbol("1", this.coins);
         this.model.resetGame();
         this.continueGame();
-        this.score = 0;
     }
-    private startGameLinear(): void {
-        this.continueGame();
-    }
+
     private continueGame() {
         this.view.updateMainMenuVisibility(false);
         this.view.showEndGamePanel(false);
-        this.view.updateScoreText(0, "", 0);
     }
 
     private showMenu(): void {
@@ -134,9 +132,5 @@ export class Controller {
 
     private changeLanguage(): void {
         this.view.changeLanguage();
-    }
-
-    private showEndGamePanel(isVisible: boolean): void {
-        this.view.showEndGamePanel(isVisible);
     }
 }
