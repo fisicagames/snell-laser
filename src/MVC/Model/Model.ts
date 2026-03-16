@@ -7,6 +7,7 @@ import { LaserModel } from "./LaserModel";
 import { TargetModel } from "./TargetModel";
 import { SplitterModel } from "./SplitterModel";
 import { GlassModel } from "./GlassModel";
+import { OpticsEngine } from "./OpticsEngine";
 
 export class Model implements IModel {
     private scene: Scene;
@@ -22,9 +23,15 @@ export class Model implements IModel {
     private groundModel!: GroundModel;
     private mirrors: MirrorModel[] = [];
     private targets: TargetModel[] = [];
-    private laserModel!: LaserModel;
     private splitters: SplitterModel[] = [];
-    private glasses: GlassModel[] =[];
+    private glasses: GlassModel[] = [];
+    private laserModel!: LaserModel;
+
+    private opticsEngine!: OpticsEngine; // <-- O Motor
+    
+    // Controle de Recálculo
+    private needsRecalculation: boolean = false;
+    private recalcTimer: number = 0;
 
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
         this.scene = scene;
@@ -32,14 +39,20 @@ export class Model implements IModel {
 
         this.startMusic();
 
-        //Start scene construction:
+        // 1. Instancia elementos da cena
         this.groundModel = new GroundModel(this.scene, 16, 32);
         this.laserModel = new LaserModel(this.scene, 0, -12, -Math.PI / 2);
         this.targets.push(new TargetModel(this.scene, 0, 0, 12));
         this.splitters.push(new SplitterModel(this.scene, 0, 0, 0, Math.PI / 4));
         this.glasses.push(new GlassModel(this.scene, 0, { x0: -3, x1: 3, z0: 4, z1: 6 }, 1.5));
-
         this.createMirrors();
+
+        // 2. Instancia o Motor passando o Model (this) para que ele leia as peças
+        this.opticsEngine = new OpticsEngine(this.scene, this);
+
+        // 3. Roda o motor pela primeira vez para exibir o laser inicial
+        this.opticsEngine.calculateRays();
+
         this.updateSceneModels();
     }
 
@@ -55,13 +68,13 @@ export class Model implements IModel {
         });
     }
 
-    public getTargets(): TargetModel[] {
-        return this.targets;
-    }
+    public getTargets(): TargetModel[] { return this.targets; }
+    public getMirrors(): MirrorModel[] { return this.mirrors; }
+    public getSplitters(): SplitterModel[] { return this.splitters; }
+    public getGlasses(): GlassModel[] { return this.glasses; }
+    public getLaser(): LaserModel { return this.laserModel; }
 
-    public getMirrors(): MirrorModel[] {
-        return this.mirrors;
-    }
+
 
 
     private startMusic() {
@@ -91,9 +104,26 @@ export class Model implements IModel {
         this.allSounds.push(this.explosionSound);
     }
 
+public triggerRecalculation(): void {
+        this.needsRecalculation = true;
+    }
+
     private updateSceneModels() {
         this.scene.onBeforeRenderObservable.add(() => {
-            //console.log("updateSceneModels");
+            const dt = this.scene.getEngine().getDeltaTime() / 1000;
+
+            // Anima os fótons (luzes que caminham pela reta)
+            this.opticsEngine.updatePhotons(dt);
+
+            // Throttle: Recalcula os raios apenas a cada ~40ms se a peça foi movida
+            if (this.needsRecalculation) {
+                this.recalcTimer += dt;
+                if (this.recalcTimer > 0.04) {
+                    this.opticsEngine.calculateRays();
+                    this.needsRecalculation = false;
+                    this.recalcTimer = 0;
+                }
+            }
         });
     }
 

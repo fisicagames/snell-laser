@@ -71,4 +71,17 @@ export class MirrorModel {
             mat.emissiveColor = isHighlighted ? new Color3(1, 0.75, 0.05) : new Color3(0.15, 0.25, 0.45);
         }
     }
+
+        public getSegment() {
+        const p = this.root.position;
+        const ry = this.rotationY; // A rotação interna da face
+        const hl = this.length / 2;
+        const sx = Math.sin(ry);
+        const cx = Math.cos(ry);
+        return { 
+            p1: { x: p.x - hl * sx, z: p.z - hl * cx }, 
+            p2: { x: p.x + hl * sx, z: p.z + hl * cx }, 
+            n: { x: cx, z: -sx } 
+        };
+    }
 }
