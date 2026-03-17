@@ -4,7 +4,6 @@ import { IView } from "../View/IView";
 import { InputKeyboardController } from "./InputKeyboardController";
 import { CameraController } from "./CameraController";
 
-// Adicionamos o 'root' para a câmera poder ler a posição do elemento
 type InteractableElement = {
     root: TransformNode;
     rotationY: number;
@@ -19,6 +18,10 @@ export class Controller {
 
     private activeElementIndex: number = 0;
 
+    // Flags para controle contínuo de rotação via botões GUI (Touch)
+    private isLeftPressed: boolean = false;
+    private isRightPressed: boolean = false;
+
     constructor(scene: Scene, model: IModel, view: IView) {
         this.scene = scene;
         this.model = model;
@@ -30,7 +33,7 @@ export class Controller {
 
         this.highlightActiveElement();
 
-        // Inicia o loop contínuo de checagens (ex: câmera suave)
+        // Inicia o loop contínuo de checagens (câmera suave e rotação contínua)
         this.update();
     }
 
@@ -38,32 +41,30 @@ export class Controller {
         return [...this.model.getMirrors(), ...this.model.getSplitters()];
     }
 
+    // ══════════════════════════════════════════════════════════════════════
+    //  CONTROLES DE TECLADO (PC)
+    // ══════════════════════════════════════════════════════════════════════
     private inputKeyboardControllerSetup() {
         this.inputKeyboardControllers.bindKeyboardEvents({
-            "arrowup":   (eventType) => { this.handleSelection(eventType, 1); },
-            "arrowdown": (eventType) => { this.handleSelection(eventType, -1); },
-            "w":         (eventType) => { this.handleSelection(eventType, 1); },
-            "s":         (eventType) => { this.handleSelection(eventType, -1); },
-            "arrowleft":  (eventType) => { this.handleRotation(eventType, -1); },
-            "arrowright": (eventType) => { this.handleRotation(eventType, 1); },
-            "q":          (eventType) => { this.handleRotation(eventType, -1); },
-            "e":          (eventType) => { this.handleRotation(eventType, 1); },
+            "arrowup":   (eventType) => { this.handleKeyboardSelection(eventType, 1); },
+            "arrowdown": (eventType) => { this.handleKeyboardSelection(eventType, -1); },
+            "w":         (eventType) => { this.handleKeyboardSelection(eventType, 1); },
+            "s":         (eventType) => { this.handleKeyboardSelection(eventType, -1); },
+            
+            "arrowleft":  (eventType) => { this.handleKeyboardRotation(eventType, -1); },
+            "arrowright": (eventType) => { this.handleKeyboardRotation(eventType, 1); },
+            "a":          (eventType) => { this.handleKeyboardRotation(eventType, -1); },
+            "d":          (eventType) => { this.handleKeyboardRotation(eventType, 1); },
         });
     }
 
-    private handleSelection(eventType: KeyboardEventTypes, direction: number) {
+    private handleKeyboardSelection(eventType: KeyboardEventTypes, direction: number) {
         if (eventType === KeyboardEventTypes.KEYDOWN) {
-            const interactables = this.getInteractables();
-            if (interactables.length === 0) return;
-
-            interactables[this.activeElementIndex].setHighlight(false);
-            const total = interactables.length;
-            this.activeElementIndex = (this.activeElementIndex + direction + total) % total;
-            this.highlightActiveElement();
+            this.handleSelectionTap(direction);
         }
     }
 
-    private handleRotation(eventType: KeyboardEventTypes, direction: number) {
+    private handleKeyboardRotation(eventType: KeyboardEventTypes, direction: number) {
         if (eventType === KeyboardEventTypes.KEYDOWN) {
             const interactables = this.getInteractables();
             if (interactables.length > 0) {
@@ -74,6 +75,24 @@ export class Controller {
         }
     }
 
+    // ══════════════════════════════════════════════════════════════════════
+    //  LÓGICA CENTRAL DE AÇÕES (Usada pelo PC e Mobile)
+    // ══════════════════════════════════════════════════════════════════════
+    private handleSelectionTap(direction: number) {
+        const interactables = this.getInteractables();
+        if (interactables.length === 0) return;
+
+        // Desmarca atual
+        interactables[this.activeElementIndex].setHighlight(false);
+        
+        // Pula pro próximo com loop
+        const total = interactables.length;
+        this.activeElementIndex = (this.activeElementIndex + direction + total) % total;
+        
+        // Destaca novo alvo
+        this.highlightActiveElement();
+    }
+
     private highlightActiveElement() {
         const interactables = this.getInteractables();
         if (interactables.length > 0) {
@@ -82,12 +101,28 @@ export class Controller {
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    //  ATUALIZAÇÃO DE CÂMERA (LOOP)
+    //  ATUALIZAÇÃO POR FRAME (LOOP)
     // ══════════════════════════════════════════════════════════════════════
     private update() {
         this.scene.onBeforeRenderObservable.add(() => {
             this.updateCameraPosition();
+            this.handleContinuousTouchRotation(); // Verifica os botões GUI sendo segurados
         });
+    }
+
+    private handleContinuousTouchRotation() {
+        if (this.isLeftPressed || this.isRightPressed) {
+            const interactables = this.getInteractables();
+            if (interactables.length > 0) {
+                const active = interactables[this.activeElementIndex];
+                
+                // Determina o sentido do giro com base em qual botão está sendo segurado
+                const direction = this.isLeftPressed ? 1 : -1;
+                
+                active.rotationY += direction * 0.024;
+                this.model.triggerRecalculation();
+            }
+        }
     }
 
     private updateCameraPosition(): void {
@@ -97,10 +132,7 @@ export class Controller {
         const activeElement = interactables[this.activeElementIndex];
         const targets = this.model.getTargets();
         
-        // Pega o nó principal (root) do Target para focar, se existir.
         const mainTarget = targets.length > 0 ? targets[0].root : null;
-
-        // Como criamos uma UniversalCamera no SceneInitializer, fazemos o cast
         const camera = this.scene.activeCamera as UniversalCamera;
         
         if (camera && activeElement) {
@@ -112,6 +144,20 @@ export class Controller {
     //  MÉTODOS DE UI E FLUXO DO JOGO
     // ══════════════════════════════════════════════════════════════════════
     private inputTouchControllerSetup() {
+        // --- CONTROLES DE JOGO (Mobile GUI) ---
+        
+        // SELEÇÃO: Apenas 1 pulo por toque
+        this.view.buttonUpDown(() => this.handleSelectionTap(1));
+        this.view.buttonDownDown(() => this.handleSelectionTap(-1));
+
+        // ROTAÇÃO: Modifica as flags para girar continuamente no loop de update
+        this.view.buttonLeftDown(() => { this.isLeftPressed = true; });
+        this.view.buttonLeftUp(() => { this.isLeftPressed = false; });
+        
+        this.view.buttonRightDown(() => { this.isRightPressed = true; });
+        this.view.buttonRightUp(() => { this.isRightPressed = false; });
+
+        // --- MENUS ---
         this.view.onButtonMenuStartA(() => {
             this.view.updateMainMenuVisibility(false); 
             this.view.updateLevelButtons(this.model.getUnlockedLevels(), this.model.getLevelScores());
@@ -128,9 +174,6 @@ export class Controller {
         this.view.onButtonMenu(() => this.showMenu());
         this.view.onToggleMusic(() => this.toggleMusic());
         this.view.onButtonLang(() => this.changeLanguage());
-        
-        this.view.buttonUpDown(() => {});
-        this.view.setButtonUpUpCallback(() => null);
     }
 
     private startGame(levelIndex: number): void {
