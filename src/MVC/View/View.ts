@@ -36,6 +36,7 @@ export class View implements IView {
     private textblockCenterPhrase!: TextBlock;
     private textblockSecond!: TextBlock;
     private rectangleAviso!: Rectangle;
+    private rectangleFases!: Rectangle;
     private textblockAviso!: TextBlock;
     private buttonEfeitoSuave!: Button;
     private buttonEfeitoIntenso!: Button;
@@ -89,6 +90,7 @@ export class View implements IView {
         this.textblockCenterPhrase.isVisible = false;
         this.textblockSecond = this.advancedTexture.getControlByName("TextblockSecond") as TextBlock;
         this.rectangleAviso = this.advancedTexture.getControlByName("RectangleAviso") as Rectangle;
+        this.rectangleFases = this.advancedTexture.getControlByName("RectangleFases") as Rectangle;
         this.textblockAviso = this.advancedTexture.getControlByName("TextblockAviso") as TextBlock;
         this.buttonEfeitoSuave = this.advancedTexture.getControlByName("ButtonEfeitoSuave") as Button;
         this.buttonEfeitoIntenso = this.advancedTexture.getControlByName("ButtonEfeitoIntenso") as Button;

@@ -22,7 +22,7 @@ export class OpticsEngine {
 
     // Cores
     private readonly BEAM_LASER = new Color3(1.0, 0.06, 0.06);
-    private readonly BEAM_SPLIT = new Color3(0.80, 0.20, 0.20);
+    private readonly BEAM_SPLIT = new Color3(1.0, 0.16, 0.16);
     private readonly ARROW_COL = new Color3(1.0, 0.55, 0.15);
     private readonly PHOT_COL = new Color3(1.0, 0.65, 0.65);
     private readonly PHOT_SPLIT = new Color3(1.0, 0.95, 0.55);
@@ -128,6 +128,22 @@ export class OpticsEngine {
         this.rayMeshes.push(cone);
     }
 
+    // NOVO: Desenha a linha normal tracejada na colisão
+    private drawNormal(hitXZ: Vector2D, nXZ: Vector2D) {
+        const hp = new Vector3(hitXZ.x, this.RAY_Y, hitXZ.z);
+        const nv = new Vector3(nXZ.x, 0, nXZ.z).normalize();
+        const col = new Color3(0.25, 0.25, 0.9);
+        const dl = 0.30, gap = 0.22, total = 1.9;
+        
+        for (const sign of [-1, 1]) {
+            let t = gap * 0.45;
+            while (t < total) {
+                this.drawBeam(hp.add(nv.scale(sign * t)), hp.add(nv.scale(sign * (t + dl))), col, 0.024);
+                t += dl + gap;
+            }
+        }
+    }
+
     private spawnPhoton(path3: Vector3[], color: Color3) {
         const mesh = MeshBuilder.CreateSphere("ph_" + Math.random(), { diameter: 0.28, segments: 5 }, this.scene);
         const mat = new StandardMaterial("pm_" + Math.random(), this.scene);
@@ -149,7 +165,10 @@ export class OpticsEngine {
             
             let o = this.v2(oIn.x, oIn.z);
             let d = this.norm2({ x: dIn.x, z: dIn.z });
+            
             const pathXZ = [this.v2(o.x, o.z)];
+            // Array para guardar as normais em cada ponto de impacto
+            const normals: (Vector2D | null)[] =[];
             
             let inGlass = false;
             let inGlassRef: GlassModel | null = null;
@@ -201,37 +220,48 @@ export class OpticsEngine {
                 const ep = this.v2(o.x + bestT * d.x, o.z + bestT * d.z);
                 pathXZ.push(ep);
 
-                if (bestKind === 'target') { hitSet.add(bestData); break; }
-                if (bestKind === 'wall') { break; }
+                if (bestKind === 'target') { hitSet.add(bestData); normals.push(null); break; }
+                if (bestKind === 'wall') { normals.push(null); break; }
 
                 if (bestKind === 'mirror') {
                     let n = bestData.seg.n;
                     if (this.dot2(d, n) > 0) n = this.v2(-n.x, -n.z);
+                    normals.push(n); // Guarda a normal
                     d = this.reflect2(d, n); o = ep;
                 } else if (bestKind === 'splitter') {
                     let n = bestData.seg.n;
                     if (this.dot2(d, n) > 0) n = this.v2(-n.x, -n.z);
+                    normals.push(n); // Guarda a normal
                     const reflD = this.reflect2(d, n);
-                    // Dispara a ramificação refletida
                     traceBeam(this.v2(ep.x, ep.z), reflD, n1, depth + 1, this.BEAM_SPLIT, this.PHOT_SPLIT);
-                    o = ep; // Continua reto (transmissão)
+                    o = ep; 
                 } else if (bestKind === 'gIn') {
                     const bn = this.boxNormal(ep, bestData.bb);
+                    normals.push(bn); // Guarda a normal
                     d = this.refract2(d, bn, 1.0, bestData.refractionIndex);
                     o = ep; inGlass = true; inGlassRef = bestData;
                 } else { // gOut
                     const bn = this.boxNormal(ep, bestData.bb);
+                    normals.push(bn); // Guarda a normal
                     d = this.refract2(d, bn, bestData.refractionIndex, 1.0);
                     o = ep; inGlass = false; inGlassRef = null;
                 }
             }
 
-            // Renderiza este segmento do raio
+            // Renderiza este segmento do raio e as setas
             const path3 = pathXZ.map(p => new Vector3(p.x, this.RAY_Y, p.z));
             for (let i = 0; i < path3.length - 1; i++) {
                 this.drawBeam(path3[i], path3[i + 1], color, 0.072);
                 this.drawArrowHead(path3[i], path3[i + 1], this.ARROW_COL);
             }
+
+            // NOVO: Renderiza as normais tracejadas nos pontos de colisão
+            for (let i = 0; i < normals.length; i++) {
+                if (normals[i]) {
+                    this.drawNormal(pathXZ[i + 1], normals[i]!);
+                }
+            }
+
             if (path3.length >= 2) this.spawnPhoton(path3, photColor);
         };
 
