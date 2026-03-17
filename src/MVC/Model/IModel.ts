@@ -7,8 +7,8 @@ import { LaserModel } from "./LaserModel";
 
 export interface IModel {
     toggleMusicPlayback(): void;
-    setScoreUpdateCallback(callback: (newScore: number, state: string, work: number) => void): void;
-    setEndGameCallback(callback: (isVisible: boolean) => void): void;  
+    setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number) => void): void;
+    updateGameState(isWin: boolean, reflections: number, refractions: number): void;    setEndGameCallback(callback: (isVisible: boolean) => void): void;  
     resetGame(): void;
     updateModels: boolean;
 

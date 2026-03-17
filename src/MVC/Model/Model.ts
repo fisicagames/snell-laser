@@ -37,6 +37,10 @@ export class Model implements IModel {
     private unlockedLevels: number = 1; // Apenas a Fase 1 inicia desbloqueada
     private levelScores: number[] = new Array(12).fill(0); // Zera as 12 pontuações
 
+    private currentLevelIndex: number = 0;
+    private scoreUpdateCallback: ((score: number, ref: number, refr: number) => void) | null = null;
+    
+
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
         this.scene = scene;
         this.physicsPlugin = physicsPlugin || null;
@@ -70,13 +74,48 @@ export class Model implements IModel {
     }
 
     public loadLevel(levelIndex: number): void {
+        this.currentLevelIndex = levelIndex;
         console.log(`Carregando e montando a Fase ${levelIndex + 1}...`);
-        
-        // FUTURO: Aqui nós vamos apagar os espelhos e alvos antigos e 
-        // recriá-los lendo de um JSON de fases (usando o levelIndex).
-        
-        // Por enquanto, apenas forçamos o cálculo inicial da fase estática de teste.
         this.triggerRecalculation();
+    }
+
+    public setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number) => void): void {
+        this.scoreUpdateCallback = callback;
+    }
+
+    // NOVO: Chamado pelo OpticsEngine a cada recálculo
+    public updateGameState(isWin: boolean, reflections: number, refractions: number): void {
+        // Calcula a pontuação atual
+        const currentScore = (reflections * 10) + (refractions * 20);
+
+        // Atualiza a tela (Placar ao Vivo)
+        if (this.scoreUpdateCallback) {
+            this.scoreUpdateCallback(currentScore, reflections, refractions);
+        }
+
+        // Verifica a Condição de Vitória
+        if (isWin && !this.endGAme) {
+            this.endGAme = true; // Impede disparos múltiplos
+            
+            // Salva o maior score alcançado nesta fase
+            this.levelScores[this.currentLevelIndex] = Math.max(this.levelScores[this.currentLevelIndex], currentScore);
+            
+            // Desbloqueia a próxima fase
+            if (this.currentLevelIndex + 1 >= this.unlockedLevels && this.unlockedLevels < 12) {
+                this.unlockedLevels = this.currentLevelIndex + 2; 
+            }
+
+            if (this.endGameCallback) {
+                this.endGameCallback(true);
+            }
+        } 
+        // Se o usuário mexer no espelho e quebrar a vitória, removemos a tela de endGame
+        else if (!isWin && this.endGAme) {
+            this.endGAme = false;
+            if (this.endGameCallback) {
+                this.endGameCallback(false);
+            }
+        }
     }
 
     private createMirrors(): void {
@@ -160,12 +199,6 @@ public triggerRecalculation(): void {
     public setEndGameCallback(callback: (isVisible: boolean) => void): void {
         this.endGameCallback = callback;
     }
-
-    public setScoreUpdateCallback(callback: (newScore: number, state: string, work: number) => void): void {
-        console.log("this.someModel.setUpdateScoreCallback(callback);", callback);
-
-    }
-
 
     public resetGame() {
         this.updateModels = false;

@@ -281,26 +281,22 @@ export class View implements IView {
         this.buttonLeft.onPointerDownObservable.add(callback);
     }
 
-    public updateScoreText(newScore: number, statePT: string, work: number): void {
-        const state = translate(statePT, this.languageSwitcher.languageOption);
-        if (this.languageSwitcher.languageOption == 0) {
-            this.textblockLevel.text = `${state}\n Trabalho: ${work.toFixed(1).replace('.', ',')} J \n Trabalho total: ${newScore.toFixed(0)} J`;
-            //TODO: Remove next line for run only when endGame event. Send to show end game?
-            this.textblockMenuBest.text = this.getScoreDisplay(this.topScore);
+    public updateScoreText(score: number, reflections: number, refractions: number): void {
+        if (this.languageSwitcher.languageOption == 0) { // Português
+            this.textblockLevel.text = `Reflexões: ${reflections} | Refrações: ${refractions}\n⭐ Pontos: ${score}`;
+        } else { // Inglês
+            this.textblockLevel.text = `Reflections: ${reflections} | Refractions: ${refractions}\n⭐ Score: ${score}`;
         }
-        else {
-            this.textblockLevel.text = `${state}\n Work: ${work.toFixed(1)} J \n Total Work: ${newScore.toFixed(0)} J`;
-            //TODO: Remove next line for run only when endGame event. Send to show end game?
-            this.textblockMenuBest.text = this.getScoreDisplay(this.topScore);
-
-        }
-        if (this.topScore < newScore) {
-            this.topScore = newScore;
+        
+        // Atualiza o recorde do nível atual se aplicável
+        if (this.topScore < score) {
+            this.topScore = score;
             if (this.topScore > 3) {
-                this.getBestScoreDisplay(newScore);
+                this.getBestScoreDisplay(score);
             }
         }
     }
+    
     private getScoreDisplay(score: number): string {
         if (score < 500) {
             return `${score.toFixed(0)} J`;

@@ -32,6 +32,8 @@ export class OpticsEngine {
         this.gameModel = gameModel;
     }
 
+
+
     // --- Matemática 2D ---
     private v2(x: number, z: number): Vector2D { return { x, z }; }
     private norm2(v: Vector2D): Vector2D { const l = Math.hypot(v.x, v.z); return this.v2(v.x / l, v.z / l); }
@@ -157,17 +159,20 @@ export class OpticsEngine {
         this.clearRays();
         const hitSet = new Set<TargetModel>();
 
+        // NOVOS CONTADORES
+        let reflectionsCount = 0;
+        let refractionsCount = 0;
+
         // Desliga todos os alvos primeiro
         this.gameModel.getTargets().forEach(t => t.setHitState(false));
 
         const traceBeam = (oIn: Vector2D, dIn: Vector2D, n1: number, depth: number, color: Color3, photColor: Color3) => {
-            if (depth > 6) return; // Limite de divisões para evitar loop infinito
+            if (depth > 6) return; 
             
             let o = this.v2(oIn.x, oIn.z);
             let d = this.norm2({ x: dIn.x, z: dIn.z });
             
-            const pathXZ = [this.v2(o.x, o.z)];
-            // Array para guardar as normais em cada ponto de impacto
+            const pathXZ =[this.v2(o.x, o.z)];
             const normals: (Vector2D | null)[] =[];
             
             let inGlass = false;
@@ -209,7 +214,7 @@ export class OpticsEngine {
                     }
                 }
 
-                // Teste de Colisão: Paredes (Limites da Cena)
+                // Teste de Colisão: Paredes
                 if (bestKind === 'wall') {
                     let tw = 1000;
                     if (Math.abs(d.x) > 1e-6) tw = Math.min(tw, ((d.x > 0 ? this.WALL_X : -this.WALL_X) - o.x) / d.x);
@@ -224,53 +229,58 @@ export class OpticsEngine {
                 if (bestKind === 'wall') { normals.push(null); break; }
 
                 if (bestKind === 'mirror') {
+                    reflectionsCount++; // Conta reflexão
                     let n = bestData.seg.n;
                     if (this.dot2(d, n) > 0) n = this.v2(-n.x, -n.z);
-                    normals.push(n); // Guarda a normal
+                    normals.push(n); 
                     d = this.reflect2(d, n); o = ep;
                 } else if (bestKind === 'splitter') {
+                    reflectionsCount++; // Conta reflexão do splitter
                     let n = bestData.seg.n;
                     if (this.dot2(d, n) > 0) n = this.v2(-n.x, -n.z);
-                    normals.push(n); // Guarda a normal
+                    normals.push(n); 
                     const reflD = this.reflect2(d, n);
                     traceBeam(this.v2(ep.x, ep.z), reflD, n1, depth + 1, this.BEAM_SPLIT, this.PHOT_SPLIT);
                     o = ep; 
                 } else if (bestKind === 'gIn') {
+                    refractionsCount++; // Conta refração (Entrada)
                     const bn = this.boxNormal(ep, bestData.bb);
-                    normals.push(bn); // Guarda a normal
+                    normals.push(bn); 
                     d = this.refract2(d, bn, 1.0, bestData.refractionIndex);
                     o = ep; inGlass = true; inGlassRef = bestData;
                 } else { // gOut
+                    refractionsCount++; // Conta refração (Saída)
                     const bn = this.boxNormal(ep, bestData.bb);
-                    normals.push(bn); // Guarda a normal
+                    normals.push(bn); 
                     d = this.refract2(d, bn, bestData.refractionIndex, 1.0);
                     o = ep; inGlass = false; inGlassRef = null;
                 }
             }
 
-            // Renderiza este segmento do raio e as setas
             const path3 = pathXZ.map(p => new Vector3(p.x, this.RAY_Y, p.z));
             for (let i = 0; i < path3.length - 1; i++) {
                 this.drawBeam(path3[i], path3[i + 1], color, 0.072);
                 this.drawArrowHead(path3[i], path3[i + 1], this.ARROW_COL);
             }
 
-            // NOVO: Renderiza as normais tracejadas nos pontos de colisão
             for (let i = 0; i < normals.length; i++) {
-                if (normals[i]) {
-                    this.drawNormal(pathXZ[i + 1], normals[i]!);
-                }
+                if (normals[i]) this.drawNormal(pathXZ[i + 1], normals[i]!);
             }
 
             if (path3.length >= 2) this.spawnPhoton(path3, photColor);
         };
 
-        // Disparo Inicial do Canhão Laser
         const laser = this.gameModel.getLaser();
         traceBeam(laser.getSourcePosition(), laser.getDirection(), 1.0, 0, this.BEAM_LASER, this.PHOT_COL);
 
-        // Atualiza o estado visual dos alvos atingidos
         hitSet.forEach(target => target.setHitState(true));
+
+        // VERIFICA VITÓRIA: O número de alvos atingidos é igual ao número total de alvos da fase?
+        const totalTargets = this.gameModel.getTargets().length;
+        const isWin = (hitSet.size === totalTargets) && (totalTargets > 0);
+
+        // ENVIAR STATUS PARA O MODEL
+        this.gameModel.updateGameState(isWin, reflectionsCount, refractionsCount);
     }
 
     // Chamado a cada frame para animar os pontinhos de luz (fótons)
