@@ -9,6 +9,12 @@ export interface IView {
     onToggleMusic(callback: () => void): void;
     onButtonLang(callback: () => void): void;
 
+    // --- Novos métodos para a Seleção de Fases ---
+    onLevelSelect(callback: (levelIndex: number) => void): void;
+    updateLevelButtons(unlockedLevels: number, scores: number[]): void;
+    hideLevelSelectionPanel(): void;
+    // ---------------------------------------------
+
     setButtonUpUpCallback(callback: () => void): void;
     buttonDownUp(callback: () => void): void;
     buttonRightUp(callback: () => void): void;
@@ -26,8 +32,6 @@ export interface IView {
     changeLanguage(): void;
 
     updateScoreText(newScore: number, state: string, work: number): void;
-
     showEndGamePanel(isVisible: boolean): void;
-
     changeButtonUPSymbol(string: string, coins: number): void;
 }

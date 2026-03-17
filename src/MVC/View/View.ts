@@ -1,6 +1,6 @@
 // src\View\View.ts
 import { Scene } from "@babylonjs/core";
-import { AdvancedDynamicTexture, Button, Rectangle, TextBlock } from "@babylonjs/gui";
+import { AdvancedDynamicTexture, Button, Rectangle, TextBlock, Grid } from "@babylonjs/gui";
 import { IView } from "./IView";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { EndGamePhrases } from "./EndGamePhrases";
@@ -44,6 +44,11 @@ export class View implements IView {
     private firstTime: boolean = true;
     private textblockMenuLevel!: TextBlock;
     private textblockGraph!: TextBlock;
+
+    // Elementos do Grid de Fases
+    private levelButtons: Button[] =[];
+    private levelScoreTexts: TextBlock[] =[];
+    private onLevelSelectCallback: ((levelIndex: number) => void) | null = null;
 
     constructor(scene: Scene, advancedTexture: AdvancedDynamicTexture) {
         this.scene = scene;
@@ -102,6 +107,96 @@ export class View implements IView {
         this.buttonMenuPlay.onPointerUpObservable.add(() => {
             this.rectangleAviso.isVisible = false;
         });
+
+        this.setupLevelGrid();
+    }
+
+    private setupLevelGrid() {
+        if (!this.rectangleFases) return; // Segurança caso o nome no JSON esteja diferente
+
+        const grid = new Grid();
+        // 3 Colunas iguais
+        grid.addColumnDefinition(1.0, false);
+        grid.addColumnDefinition(1.0, false);
+        grid.addColumnDefinition(1.0, false);
+        // 4 Linhas iguais
+        grid.addRowDefinition(1.0, false);
+        grid.addRowDefinition(1.0, false);
+        grid.addRowDefinition(1.0, false);
+        grid.addRowDefinition(1.0, false);
+
+        this.rectangleFases.addControl(grid);
+
+        // Criar 12 botões
+        for (let i = 0; i < 12; i++) {
+            const btn = new Button("btnLevel" + i);
+            btn.paddingTop = "5px";
+            btn.paddingBottom = "5px";
+            btn.paddingLeft = "5px";
+            btn.paddingRight = "5px";
+            btn.cornerRadius = 8;
+            btn.thickness = 2;
+
+            // Criar um Grid interno no botão para dividir entre Número (cima) e Score (baixo)
+            const innerGrid = new Grid();
+            innerGrid.addRowDefinition(0.6, false); // 60% altura pro número
+            innerGrid.addRowDefinition(0.4, false); // 40% altura pra pontuação
+
+            const txtNum = new TextBlock("txtNum" + i, (i + 1).toString());
+            txtNum.fontSize = 24;
+            txtNum.color = "white";
+            txtNum.fontWeight = "bold";
+
+            const txtScore = new TextBlock("txtScore" + i, "0 pts");
+            txtScore.fontSize = 12;
+            txtScore.color = "#00E5FFFF";
+
+            innerGrid.addControl(txtNum, 0, 0);
+            innerGrid.addControl(txtScore, 1, 0);
+            btn.addControl(innerGrid);
+
+            // Adiciona no Grid Principal
+            const row = Math.floor(i / 3);
+            const col = i % 3;
+            grid.addControl(btn, row, col);
+
+            // Salva na lista para podermos atualizar (bloquear/desbloquear) depois
+            this.levelButtons.push(btn);
+            this.levelScoreTexts.push(txtScore);
+
+            // Ação de Clique
+            btn.onPointerUpObservable.add(() => {
+                if (btn.isEnabled && this.onLevelSelectCallback) {
+                    this.onLevelSelectCallback(i);
+                }
+            });
+        }
+    }
+
+    // --- MÉTODOS DE CONTROLE DA GRADE DE FASES ---
+    public onLevelSelect(callback: (levelIndex: number) => void): void {
+        this.onLevelSelectCallback = callback;
+    }
+
+    public updateLevelButtons(unlockedLevels: number, scores: number[]): void {
+        for (let i = 0; i < 12; i++) {
+            if (i < unlockedLevels) {
+                // Fase Liberada
+                this.levelButtons[i].isEnabled = true;
+                this.levelButtons[i].background = "#0055aa"; // Azul mais vivo
+                this.levelButtons[i].alpha = 1.0;
+            } else {
+                // Fase Bloqueada
+                this.levelButtons[i].isEnabled = false;
+                this.levelButtons[i].background = "#223344"; // Cinza/Azul escuro
+                this.levelButtons[i].alpha = 0.5;
+            }
+            this.levelScoreTexts[i].text = (scores[i] || 0) + " pts";
+        }
+    }
+
+    public hideLevelSelectionPanel(): void {
+        this.rectangleAviso.isVisible = false;
     }
 
     public updateMainMenuVisibility(isVisible: boolean) {
