@@ -119,7 +119,7 @@ export class Controller {
                 // Determina o sentido do giro com base em qual botão está sendo segurado
                 const direction = this.isLeftPressed ? 1 : -1;
                 
-                active.rotationY += direction * 0.024;
+                active.rotationY += direction * 0.012;
                 this.model.triggerRecalculation();
             }
         }
