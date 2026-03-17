@@ -96,27 +96,52 @@ export class Controller {
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    //  MÉTODOS DE UI (Mantidos para a View não quebrar, mas limpos por dentro)
+    //  MÉTODOS DE UI / CONTROLE DE FLUXO E FASES
     // ══════════════════════════════════════════════════════════════════════
     private inputTouchControllerSetup() {
-        this.view.onButtonMenuStartA(() => this.startGame());
-        this.view.onButtonMenuStartB(() => this.startGame());
-        this.view.onButtonMenuStartC(() => this.startGame());
+        // 1. Clicou em "Iniciar" no Menu Principal
+        this.view.onButtonMenuStartA(() => {
+            // A View já fez o RectangleAviso (Fases) ficar visível.
+            // Escondemos o Menu Principal para o painel de fases aparecer limpo.
+            this.view.updateMainMenuVisibility(false); 
+            // Atualizamos a grade pintando a Fase 1 de azul e as demais de cinza.
+            this.view.updateLevelButtons(this.model.getUnlockedLevels(), this.model.getLevelScores());
+        });
+
+        // 2. Clicou em um dos botões da Grade de Fases
+        this.view.onLevelSelect((levelIndex: number) => {
+            this.startGame(levelIndex);
+        });
+
+        // Demais botões UI
+        this.view.onButtonMenuStartB(() => this.startGame(0));
+        this.view.onButtonMenuStartC(() => this.startGame(0));
         this.view.onButtonMenuContinuar(() => this.continueGame());
+        
         this.view.onButtonMenu(() => this.showMenu());
         this.view.onToggleMusic(() => this.toggleMusic());
         this.view.onButtonLang(() => this.changeLanguage());
         
-        // Setups vazios para os botões virtuais que antes eram do jogo antigo
         this.view.buttonUpDown(() => {});
         this.view.setButtonUpUpCallback(() => null);
     }
 
-    private startGame(): void {
-        this.model.resetGame();
+    // Método responsável por iniciar a cena 3D e esconder toda a UI que cobre a tela
+    private startGame(levelIndex: number): void {
+        // Carrega a fase no modelo 3D
+        this.model.loadLevel(levelIndex);
+        
+        // Esconde o painel de Seleção de Fases (RectangleAviso)
+        this.view.hideLevelSelectionPanel();
+        
+        // Garante que menus de Pause/EndGame não estão na frente da tela
         this.continueGame();
+        
+        // Seleciona e destaca o primeiro espelho automaticamente para o jogador
+        this.activeElementIndex = 0;
+        this.highlightActiveElement();
     }
-
+    
     private continueGame() {
         this.view.updateMainMenuVisibility(false);
         this.view.showEndGamePanel(false);

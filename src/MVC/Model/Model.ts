@@ -33,6 +33,10 @@ export class Model implements IModel {
     private needsRecalculation: boolean = false;
     private recalcTimer: number = 0;
 
+    // --- CONTROLE DE PROGRESSÃO ---
+    private unlockedLevels: number = 1; // Apenas a Fase 1 inicia desbloqueada
+    private levelScores: number[] = new Array(12).fill(0); // Zera as 12 pontuações
+
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
         this.scene = scene;
         this.physicsPlugin = physicsPlugin || null;
@@ -54,6 +58,25 @@ export class Model implements IModel {
         this.opticsEngine.calculateRays();
 
         this.updateSceneModels();
+    }
+
+    // --- MÉTODOS DE PROGRESSÃO ---
+    public getUnlockedLevels(): number {
+        return this.unlockedLevels;
+    }
+
+    public getLevelScores(): number[] {
+        return this.levelScores;
+    }
+
+    public loadLevel(levelIndex: number): void {
+        console.log(`Carregando e montando a Fase ${levelIndex + 1}...`);
+        
+        // FUTURO: Aqui nós vamos apagar os espelhos e alvos antigos e 
+        // recriá-los lendo de um JSON de fases (usando o levelIndex).
+        
+        // Por enquanto, apenas forçamos o cálculo inicial da fase estática de teste.
+        this.triggerRecalculation();
     }
 
     private createMirrors(): void {

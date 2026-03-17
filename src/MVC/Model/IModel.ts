@@ -21,4 +21,9 @@ export interface IModel {
 
     // Novo: Solicita recálculo do raio quando uma peça se move
     triggerRecalculation(): void;
+
+    // --- NOVOS MÉTODOS DE PROGRESSÃO ---
+    getUnlockedLevels(): number;
+    getLevelScores(): number[];
+    loadLevel(levelIndex: number): void;
 }
