@@ -34,6 +34,7 @@ export class View implements IView {
     private topScore: number = 0;
     private textblockScoreGame!: TextBlock;
     private textblockCenterPhrase!: TextBlock;
+    private rectangleCenterPhrase!: Rectangle;
     private textblockSecond!: TextBlock;
     private rectangleAviso!: Rectangle;
     private rectangleFases!: Rectangle;
@@ -89,7 +90,9 @@ export class View implements IView {
         this.textblockTotalScore = this.advancedTexture.getControlByName("TextblockTotalScore") as TextBlock;
         this.textblockScoreGame = this.advancedTexture.getControlByName("TextblockScoreGame") as TextBlock;
         this.textblockCenterPhrase = this.advancedTexture.getControlByName("TextblockCenterPhrase") as TextBlock;
-        this.textblockCenterPhrase.isVisible = false;
+        this.rectangleCenterPhrase = this.advancedTexture.getControlByName("RectangleCenterPhrase") as Rectangle;
+        this.rectangleCenterPhrase.isVisible = false;
+        this.rectangleGame = this.advancedTexture.getControlByName("RectangleGame") as Rectangle;
         this.textblockSecond = this.advancedTexture.getControlByName("TextblockSecond") as TextBlock;
         this.rectangleAviso = this.advancedTexture.getControlByName("RectangleAviso") as Rectangle;
         this.rectangleFases = this.advancedTexture.getControlByName("RectangleFases") as Rectangle;
@@ -203,7 +206,7 @@ export class View implements IView {
         this.rectangleTouch.isVisible = !isVisible;
         this.rectangleTop.isVisible = !isVisible;
         this.rectangleGame.isVisible = !isVisible;
-        this.textblockCenterPhrase.isVisible = !isVisible;
+        this.rectangleCenterPhrase.isVisible = !isVisible;
     }
 
     public onButtonEfeitoSuave(callback: () => void) {
@@ -296,7 +299,7 @@ export class View implements IView {
             }
         }
     }
-    
+
     private getScoreDisplay(score: number): string {
         if (score < 500) {
             return `${score.toFixed(0)} J`;
@@ -337,12 +340,12 @@ export class View implements IView {
 
     public showEndGamePanel(isVisible: boolean): void {
         this.rectangleGame.isVisible = isVisible;
-        if (isVisible && !this.textblockCenterPhrase.isVisible) {
-            this.textblockCenterPhrase.isVisible = isVisible;
-            this.textblockCenterPhrase.text = PhysicsConceptualPhrases.getRandomPendulumPhrase(this.languageSwitcher.languageOption);
+        if (isVisible && !this.rectangleCenterPhrase.isVisible) {
+            this.rectangleCenterPhrase.isVisible = isVisible;
+            this.textblockCenterPhrase.text = PhysicsConceptualPhrases.getRandomOpticPhrase(this.languageSwitcher.languageOption);
         }
         else {
-            this.textblockCenterPhrase.isVisible = isVisible;
+            this.rectangleCenterPhrase.isVisible = isVisible;
         }
     }
     public changeButtonUPSymbol(string: string, coins: number) {
