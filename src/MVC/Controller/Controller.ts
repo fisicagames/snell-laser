@@ -186,7 +186,7 @@ export class Controller {
 
         this.view.onButtonMenuStartB(() => this.startGame(0));
         this.view.onButtonMenuStartC(() => this.startGame(0));
-        this.view.onButtonMenuContinuar(() => this.continueGame());
+        this.view.onButtonMenuContinuar(() => this.showLevelSelectionPanel());
 
         this.view.onButtonMenu(() => this.showMenu());
         this.view.onToggleMusic(() => this.toggleMusic());
@@ -202,6 +202,11 @@ export class Controller {
         this.highlightActiveElement();
     }
 
+    private showLevelSelectionPanel(){
+        this.view.updateLevelButtons(this.model.getUnlockedLevels(), this.model.getLevelScores());
+        this.view.showLevelSelectionPanel();
+    }
+    
     private continueGame() {
         this.view.updateMainMenuVisibility(false);
         this.view.showEndGamePanel(false);
