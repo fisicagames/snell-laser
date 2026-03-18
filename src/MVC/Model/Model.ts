@@ -52,7 +52,7 @@ export class Model implements IModel {
         this.laserModel = new LaserModel(this.scene, 0, -12, -Math.PI / 2);
         this.targets.push(new TargetModel(this.scene, 0, 0, 12));
         this.splitters.push(new SplitterModel(this.scene, 0, 0, 0, Math.PI / 4));
-        this.glasses.push(new GlassModel(this.scene, 0, { x0: -3, x1: 3, z0: 4, z1: 6 }, 1.5));
+        this.glasses.push(new GlassModel(this.scene, 0, 0, 5, 0, 6, 2, 1.5));
         this.createMirrors();
 
         // 2. Instancia o Motor passando o Model (this) para que ele leia as peças

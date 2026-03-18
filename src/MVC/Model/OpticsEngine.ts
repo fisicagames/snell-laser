@@ -64,32 +64,71 @@ export class OpticsEngine {
         return (t > 1e-4 && u >= -1e-6 && u <= 1 + 1e-6) ? t : null;
     }
 
-    private hitBox(o: Vector2D, d: Vector2D, bb: any): { tEn: number, tEx: number } | null {
+    private hitOBB(o: Vector2D, d: Vector2D, center: Vector2D, angle: number, halfW: number, halfD: number): { tEn: number, tEx: number } | null {
+        // Move o raio para o espaço local do bloco (centro = 0,0)
+        const lx = o.x - center.x;
+        const lz = o.z - center.z;
+
+        // Desfaz a rotação do bloco no raio (Rotaciona na direção oposta)
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+        const localOx = lx * cosA - lz * sinA;
+        const localOz = lx * sinA + lz * cosA;
+        const localDx = d.x * cosA - d.z * sinA;
+        const localDz = d.x * sinA + d.z * cosA;
+
         let t1x, t2x, t1z, t2z;
-        if (Math.abs(d.x) < 1e-12) {
-            if (o.x < bb.x0 - 1e-6 || o.x > bb.x1 + 1e-6) return null;
+        
+        if (Math.abs(localDx) < 1e-12) {
+            if (localOx < -halfW - 1e-6 || localOx > halfW + 1e-6) return null;
             t1x = -1e9; t2x = 1e9;
         } else {
-            t1x = (bb.x0 - o.x) / d.x; t2x = (bb.x1 - o.x) / d.x;
+            t1x = (-halfW - localOx) / localDx;
+            t2x = (halfW - localOx) / localDx;
             if (t1x > t2x) { const s = t1x; t1x = t2x; t2x = s; }
         }
-        if (Math.abs(d.z) < 1e-12) {
-            if (o.z < bb.z0 - 1e-6 || o.z > bb.z1 + 1e-6) return null;
+
+        if (Math.abs(localDz) < 1e-12) {
+            if (localOz < -halfD - 1e-6 || localOz > halfD + 1e-6) return null;
             t1z = -1e9; t2z = 1e9;
         } else {
-            t1z = (bb.z0 - o.z) / d.z; t2z = (bb.z1 - o.z) / d.z;
+            t1z = (-halfD - localOz) / localDz;
+            t2z = (halfD - localOz) / localDz;
             if (t1z > t2z) { const s = t1z; t1z = t2z; t2z = s; }
         }
-        const tEn = Math.max(t1x, t1z), tEx = Math.min(t2x, t2z);
-        return tEn <= tEx ? { tEn, tEx } : null;
+
+        const tEn = Math.max(t1x, t1z);
+        const tEx = Math.min(t2x, t2z);
+
+        if (tEn <= tEx && tEx > 1e-4) return { tEn, tEx };
+        return null;
     }
 
-    private boxNormal(pt: Vector2D, bb: any): Vector2D {
+    private obbNormal(pt: Vector2D, center: Vector2D, angle: number, halfW: number, halfD: number): Vector2D {
+        const lx = pt.x - center.x;
+        const lz = pt.z - center.z;
+
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+
+        // Converte o ponto de impacto pro espaço local
+        const localX = lx * cosA - lz * sinA;
+        const localZ = lx * sinA + lz * cosA;
+
         const e = 0.04;
-        if (Math.abs(pt.x - bb.x0) < e) return this.v2(-1, 0);
-        if (Math.abs(pt.x - bb.x1) < e) return this.v2(1, 0);
-        if (Math.abs(pt.z - bb.z0) < e) return this.v2(0, -1);
-        return this.v2(0, 1);
+        let localNx = 0, localNz = 0;
+        
+        if (Math.abs(localX - (-halfW)) < e) localNx = -1;
+        else if (Math.abs(localX - halfW) < e) localNx = 1;
+        else if (Math.abs(localZ - (-halfD)) < e) localNz = -1;
+        else if (Math.abs(localZ - halfD) < e) localNz = 1;
+        else localNz = 1; // fallback
+
+        // Rotaciona a normal de volta para o mundo real
+        return this.v2(
+            localNx * cosA + localNz * sinA,
+            -localNx * sinA + localNz * cosA
+        );
     }
 
     // --- Renderização Visual ---
@@ -195,9 +234,10 @@ export class OpticsEngine {
                     if (t !== null && t < bestT) { bestT = t; bestKind = 'splitter'; bestData = { seg }; }
                 }
 
-                // Teste de Colisão: Vidro
+                // Teste de Colisão: Vidro (OBB)
                 for (const g of this.gameModel.getGlasses()) {
-                    const gh = this.hitBox(o, d, g.bb);
+                    const obb = g.getOBB();
+                    const gh = this.hitOBB(o, d, obb.center, obb.angle, obb.halfW, obb.halfD);
                     if (gh) {
                         if (!inGlass && gh.tEn > 1e-4 && gh.tEn < bestT) { bestT = gh.tEn; bestKind = 'gIn'; bestData = g; }
                         if (inGlass && inGlassRef === g && gh.tEx > 1e-4 && gh.tEx < bestT) { bestT = gh.tEx; bestKind = 'gOut'; bestData = g; }
@@ -243,16 +283,18 @@ export class OpticsEngine {
                     traceBeam(this.v2(ep.x, ep.z), reflD, n1, depth + 1, this.BEAM_SPLIT, this.PHOT_SPLIT);
                     o = ep; 
                 } else if (bestKind === 'gIn') {
-                    refractionsCount++; // Conta refração (Entrada)
-                    const bn = this.boxNormal(ep, bestData.bb);
+                    refractionsCount++; 
+                    const obb = bestData.getOBB();
+                    const bn = this.obbNormal(ep, obb.center, obb.angle, obb.halfW, obb.halfD);
                     normals.push(bn); 
-                    d = this.refract2(d, bn, 1.0, bestData.refractionIndex);
+                    d = this.refract2(d, bn, 1.0, obb.n);
                     o = ep; inGlass = true; inGlassRef = bestData;
                 } else { // gOut
-                    refractionsCount++; // Conta refração (Saída)
-                    const bn = this.boxNormal(ep, bestData.bb);
+                    refractionsCount++; 
+                    const obb = bestData.getOBB();
+                    const bn = this.obbNormal(ep, obb.center, obb.angle, obb.halfW, obb.halfD);
                     normals.push(bn); 
-                    d = this.refract2(d, bn, bestData.refractionIndex, 1.0);
+                    d = this.refract2(d, bn, obb.n, 1.0);
                     o = ep; inGlass = false; inGlassRef = null;
                 }
             }

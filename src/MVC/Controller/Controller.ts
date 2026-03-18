@@ -50,7 +50,12 @@ export class Controller {
     }
 
     private getInteractables(): InteractableElement[] {
-        return [...this.model.getMirrors(), ...this.model.getSplitters()];
+        // Agora os Blocos de Vidro também podem ser selecionados e girados!
+        return[
+            ...this.model.getMirrors(), 
+            ...this.model.getSplitters(),
+            ...this.model.getGlasses() 
+        ];
     }
 
     // ══════════════════════════════════════════════════════════════════════
