@@ -284,11 +284,11 @@ export class View implements IView {
         this.buttonLeft.onPointerDownObservable.add(callback);
     }
 
-    public updateScoreText(score: number, reflections: number, refractions: number): void {
+    public updateScoreText(score: number, reflections: number, refractions: number, internalReflections: number): void {
         if (this.languageSwitcher.languageOption == 0) { // Português
-            this.textblockLevel.text = `Reflexões: ${reflections} | Refrações: ${refractions}\n⭐ Pontos: ${score}`;
+            this.textblockLevel.text = `Reflexões: ${reflections} | Refrações: ${refractions} \n Reflexões Internas Totais: ${internalReflections}\n Pontos: ${reflections}x10 + ${refractions}x20 + ${internalReflections}x50 = ${score} ⭐`;
         } else { // Inglês
-            this.textblockLevel.text = `Reflections: ${reflections} | Refractions: ${refractions}\n⭐ Score: ${score}`;
+            this.textblockLevel.text = `Reflections (x10): ${reflections} | Refractions (x20): ${refractions} \n Total Internal Reflections (x50): ${internalReflections}\n Score: ${reflections}x10 + ${refractions}x20 + ${internalReflections}x50 = ${score} ⭐`;
         }
         
         // Atualiza o recorde do nível atual se aplicável

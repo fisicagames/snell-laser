@@ -31,8 +31,8 @@ export class Controller {
         this.inputKeyboardControllerSetup();
         this.inputTouchControllerSetup();
 
-        this.model.setScoreUpdateCallback((score: number, reflections: number, refractions: number) => {
-            this.view.updateScoreText(score, reflections, refractions);
+        this.model.setScoreUpdateCallback((score: number, reflections: number, refractions: number, internalReflections: number) => {
+            this.view.updateScoreText(score, reflections, refractions, internalReflections);
         });
 
         // Quando o jogador vence o nível (atinge todos os alvos)

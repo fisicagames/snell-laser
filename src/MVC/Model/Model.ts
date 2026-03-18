@@ -38,7 +38,7 @@ export class Model implements IModel {
     private levelScores: number[] = new Array(12).fill(0); // Zera as 12 pontuações
 
     private currentLevelIndex: number = 0;
-    private scoreUpdateCallback: ((score: number, ref: number, refr: number) => void) | null = null;
+    private scoreUpdateCallback: ((score: number, ref: number, refr: number, intRef: number) => void) | null = null;
     
 
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
@@ -79,18 +79,17 @@ export class Model implements IModel {
         this.triggerRecalculation();
     }
 
-    public setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number) => void): void {
+    public setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, intRef: number) => void): void {
         this.scoreUpdateCallback = callback;
     }
 
-    // NOVO: Chamado pelo OpticsEngine a cada recálculo
-    public updateGameState(isWin: boolean, reflections: number, refractions: number): void {
+    public updateGameState(isWin: boolean, reflections: number, refractions: number, internalReflections: number): void {
         // Calcula a pontuação atual
-        const currentScore = (reflections * 10) + (refractions * 20);
+        const currentScore = (reflections * 10) + (refractions * 20) + (internalReflections * 50);
 
         // Atualiza a tela (Placar ao Vivo)
         if (this.scoreUpdateCallback) {
-            this.scoreUpdateCallback(currentScore, reflections, refractions);
+            this.scoreUpdateCallback(currentScore, reflections, refractions, internalReflections);
         }
 
         // Verifica a Condição de Vitória
@@ -109,7 +108,6 @@ export class Model implements IModel {
                 this.endGameCallback(true);
             }
         } 
-        // Se o usuário mexer no espelho e quebrar a vitória, removemos a tela de endGame
         else if (!isWin && this.endGAme) {
             this.endGAme = false;
             if (this.endGameCallback) {

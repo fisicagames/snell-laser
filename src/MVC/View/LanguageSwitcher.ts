@@ -8,7 +8,7 @@ export class LanguageSwitcher {
         this.languageOption = 0;
         this.strings = {
             ButtonLang: ["ENGLISH", "PORTUGUÊS"],
-            TextblockMeta: ["Objetivo: rotacione os espelhos para direcionar o laser até acertar o alvo! Ganhe pontos fazendo o maior número de reflexões (x100) e refrações (x200).", "Objective: rotate the mirrors to direct the laser until you hit the target! Earn points by making the highest number of reflections (x100) and refractions (x200)."],
+            TextblockMeta: ["Objetivo: rotacione os espelhos para direcionar o laser até acertar o alvo! Ganhe pontos fazendo o maior número de reflexões (x10), refrações (x20) e reflexões internas totais (x50).", "Objective: rotate the mirrors to direct the laser until you hit the target! Earn points by making the highest number of reflections (x10), refractions (x20) and internal reflections (x50)."],
             TextblockTitle: ["Snell Laser", "Snell Laser"], 
             ButtonMenuStartA: ["Iniciar", "Start"],
             ButtonMenuStartB: ["Movimento Linear", "Linear Motion"],

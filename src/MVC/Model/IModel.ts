@@ -1,4 +1,3 @@
-// Adicione estas importações se não estiverem lá:
 import { MirrorModel } from "./MirrorModel";
 import { TargetModel } from "./TargetModel";
 import { SplitterModel } from "./SplitterModel";
@@ -7,22 +6,22 @@ import { LaserModel } from "./LaserModel";
 
 export interface IModel {
     toggleMusicPlayback(): void;
-    setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number) => void): void;
-    updateGameState(isWin: boolean, reflections: number, refractions: number): void;    setEndGameCallback(callback: (isVisible: boolean) => void): void;  
+    // Assinatura garantindo os 4 parâmetros
+    setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, internalReflections: number) => void): void;
+    updateGameState(isWin: boolean, reflections: number, refractions: number, internalReflections: number): void;    
+    
+    setEndGameCallback(callback: (isVisible: boolean) => void): void;  
     resetGame(): void;
     updateModels: boolean;
 
-    // Acesso aos modelos para o Motor e o Controller
     getTargets(): TargetModel[];
     getMirrors(): MirrorModel[];
     getSplitters(): SplitterModel[];
     getGlasses(): GlassModel[];
     getLaser(): LaserModel;
 
-    // Novo: Solicita recálculo do raio quando uma peça se move
     triggerRecalculation(): void;
 
-    // --- NOVOS MÉTODOS DE PROGRESSÃO ---
     getUnlockedLevels(): number;
     getLevelScores(): number[];
     loadLevel(levelIndex: number): void;
