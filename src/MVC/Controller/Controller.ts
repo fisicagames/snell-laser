@@ -148,13 +148,15 @@ export class Controller {
         if (interactables.length === 0) return;
 
         const activeElement = interactables[this.activeElementIndex];
+        
+        // NOVO: Pegamos a lista completa de alvos, não apenas o primeiro
         const targets = this.model.getTargets();
 
-        const mainTarget = targets.length > 0 ? targets[0].root : null;
         const camera = this.scene.activeCamera as UniversalCamera;
-
+        
         if (camera && activeElement) {
-            CameraController.updatePosition(camera, activeElement.root, mainTarget);
+            // Passamos a lista de targets para o CameraController
+            CameraController.updatePosition(camera, activeElement.root, targets);
         }
     }
 

@@ -1,39 +1,44 @@
 import { Vector3, UniversalCamera, TransformNode } from "@babylonjs/core";
+import { TargetModel } from "../Model/TargetModel";
 
 export class CameraController {
     private static currentLookAt: Vector3 | null = null;
 
-    public static updatePosition(camera: UniversalCamera, activeElement: TransformNode, sceneTarget: TransformNode | null): void {
+    public static updatePosition(camera: UniversalCamera, activeElement: TransformNode, allTargets: TargetModel[]): void {
         if (!camera || !activeElement) return;
 
-        // ══════════════════════════════════════════════════════════════
-        //  1. AJUSTES DA POSIÇÃO DA CÂMERA
-        // ══════════════════════════════════════════════════════════════
-        // yHeight: Quão alta a câmera fica. (Mais alto = enxerga mais tabuleiro)
-        // zOffset: Quão para trás a câmera fica da peça ativa. (Mais negativo = mais longe)
-        const yHeight = 22;  
-        const zOffset = -32; 
-
-        const targetPos = new Vector3(0, yHeight, activeElement.position.z + zOffset);
-        camera.position = Vector3.Lerp(camera.position, targetPos, 0.05);
-
-        // ══════════════════════════════════════════════════════════════
-        //  2. AJUSTES DA MIRA (LOOK-AT)
-        // ══════════════════════════════════════════════════════════════
-        let lookAtDest: Vector3;
-
-        if (sceneTarget) {
-            // lookAtOffsetZ: Quantas unidades "puxar" o olhar para trás do alvo final.
-            // Se o alvo está em Z=12 e o offset for 10, a câmera olhará para Z=2.
-            // Isso garante que o alvo (Z=12) fique colado no TOPO da tela do celular!
-            const lookAtOffsetZ = 10; 
-            lookAtDest = new Vector3(0, 0, sceneTarget.position.z - lookAtOffsetZ);
-        } else {
-            // Fallback caso não haja alvo: apenas olha um pouco à frente da peça ativa
-            lookAtDest = new Vector3(0, 0, activeElement.position.z + 8);
+        // 1. CÁLCULO DA MÉDIA DOS ALVOS
+        let avgTargetZ = 12;
+        if (allTargets.length > 0) {
+            const sumZ = allTargets.reduce((acc, t) => acc + t.z, 0);
+            avgTargetZ = sumZ / allTargets.length;
         }
 
-        // Interpolação suave da Mira
+        const activeZ = activeElement.position.z;
+
+        // 2. POSIÇÃO DA CÂMERA (Os "olhos")
+        // yHeight = 32 (Um pouco mais baixa para achatar o ângulo e ver mais longe no horizonte)
+        // zOffset = -22 (Distância fixa atrás da peça selecionada)
+        const yHeight = 32;
+        const zOffset = -22; 
+        
+        let targetZPos = activeZ + zOffset;
+
+        // TRAVA DE SEGURANÇA: Não permite que a câmera vá além de Z = -30
+        // Isso garante que o laser (que costuma estar em Z = -12) sempre apareça.
+        if (targetZPos > -30) targetZPos = -30;
+
+        const targetPos = new Vector3(0, yHeight, targetZPos);
+        camera.position = Vector3.Lerp(camera.position, targetPos, 0.05);
+
+        // 3. MIRA DA CÂMERA (Look-At)
+        // Calculamos o meio do caminho entre a peça ativa e os alvos.
+        const centerZ = (activeZ + avgTargetZ) / 2;
+        
+        // AJUSTE: Em vez de somar +4 (olhar para frente), vamos subtrair -2 (olhar mais para trás).
+        // Isso inclina a câmera para baixo, trazendo o laser de volta para dentro da tela.
+        const lookAtDest = new Vector3(0, 0, centerZ - 2);
+
         if (!this.currentLookAt) {
             this.currentLookAt = camera.getTarget().clone();
         }
