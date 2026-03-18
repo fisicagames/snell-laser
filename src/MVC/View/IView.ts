@@ -13,6 +13,7 @@ export interface IView {
     onLevelSelect(callback: (levelIndex: number) => void): void;
     updateLevelButtons(unlockedLevels: number, scores: number[]): void;
     hideLevelSelectionPanel(): void;
+    showLevelSelectionPanel(): void; 
     // ---------------------------------------------
 
     setButtonUpUpCallback(callback: () => void): void;

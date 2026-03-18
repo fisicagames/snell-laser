@@ -24,5 +24,5 @@ export interface IModel {
 
     getUnlockedLevels(): number;
     getLevelScores(): number[];
-    loadLevel(levelIndex: number): void;
+    loadLevel(levelIndex: number): Promise<void>;
 }

@@ -13,33 +13,31 @@ export class Model implements IModel {
     private scene: Scene;
     private backgroundMusic?: SoundModel;
     private explosionSound?: SoundModel;
-    private allSounds: SoundModel[] = [];
+    private allSounds: SoundModel[] =[];
     private physicsPlugin: HavokPlugin | null;
     private endGameCallback: ((isVisible: boolean) => void) | null = null;
     public endGAme: boolean = false;
-
     public updateModels: boolean = false;
 
     private groundModel!: GroundModel;
-    private mirrors: MirrorModel[] = [];
+    private mirrors: MirrorModel[] =[];
     private targets: TargetModel[] = [];
-    private splitters: SplitterModel[] = [];
-    private glasses: GlassModel[] = [];
+    private splitters: SplitterModel[] =[];
+    private glasses: GlassModel[] =[];
     private laserModel!: LaserModel;
 
-    private opticsEngine!: OpticsEngine; // <-- O Motor
-    
-    // Controle de Recálculo
+    private opticsEngine!: OpticsEngine; 
     private needsRecalculation: boolean = false;
     private recalcTimer: number = 0;
 
-    // --- CONTROLE DE PROGRESSÃO ---
-    private unlockedLevels: number = 1; // Apenas a Fase 1 inicia desbloqueada
-    private levelScores: number[] = new Array(12).fill(0); // Zera as 12 pontuações
+    private unlockedLevels: number = 1; 
+    private levelScores: number[] = new Array(12).fill(0); 
 
     private currentLevelIndex: number = 0;
     private scoreUpdateCallback: ((score: number, ref: number, refr: number, intRef: number) => void) | null = null;
     
+    // Cache dos dados das fases do JSON
+    private levelsData: any[] =[];
 
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
         this.scene = scene;
@@ -47,36 +45,84 @@ export class Model implements IModel {
 
         this.startMusic();
 
-        // 1. Instancia elementos da cena
         this.groundModel = new GroundModel(this.scene, 16, 32);
-        this.laserModel = new LaserModel(this.scene, 0, -12, -Math.PI / 2);
-        this.targets.push(new TargetModel(this.scene, 0, 0, 12));
-        this.splitters.push(new SplitterModel(this.scene, 0, 0, 0, Math.PI / 4));
-        this.glasses.push(new GlassModel(this.scene, 0, 0, 5, 0, 6, 2, 1.5));
-        this.createMirrors();
-
-        // 2. Instancia o Motor passando o Model (this) para que ele leia as peças
         this.opticsEngine = new OpticsEngine(this.scene, this);
 
-        // 3. Roda o motor pela primeira vez para exibir o laser inicial
-        this.opticsEngine.calculateRays();
-
+        // Ao invés de instanciar peças soltas, mandamos carregar a Fase 1
+        this.loadLevel(0);
         this.updateSceneModels();
     }
 
-    // --- MÉTODOS DE PROGRESSÃO ---
-    public getUnlockedLevels(): number {
-        return this.unlockedLevels;
+    public getUnlockedLevels(): number { return this.unlockedLevels; }
+    public getLevelScores(): number[] { return this.levelScores; }
+
+    // Limpa a tela antes de construir uma nova fase
+    private clearCurrentLevel(): void {
+        if (this.laserModel) {
+            this.laserModel.root.dispose();
+        }
+        this.targets.forEach(t => t.root.dispose());
+        this.mirrors.forEach(m => m.root.dispose());
+        this.splitters.forEach(s => s.root.dispose());
+        this.glasses.forEach(g => g.root.dispose());
+
+        this.targets = [];
+        this.mirrors =[];
+        this.splitters = [];
+        this.glasses =[];
     }
 
-    public getLevelScores(): number[] {
-        return this.levelScores;
-    }
-
-    public loadLevel(levelIndex: number): void {
+    // Assíncrono: Baixa o JSON e constrói a fase lendo ele
+    public async loadLevel(levelIndex: number): Promise<void> {
         this.currentLevelIndex = levelIndex;
-        console.log(`Carregando e montando a Fase ${levelIndex + 1}...`);
-        this.triggerRecalculation();
+        console.log(`Carregando a Fase ${levelIndex + 1}...`);
+
+        try {
+            // Só baixa o arquivo na primeira vez
+            if (this.levelsData.length === 0) {
+                const response = await fetch('./assets/levels.json');
+                this.levelsData = await response.json();
+            }
+
+            const levelData = this.levelsData[levelIndex];
+            if (!levelData) {
+                console.warn(`Fase ${levelIndex + 1} ainda não existe no levels.json!`);
+                return;
+            }
+
+            this.clearCurrentLevel();
+
+            // 1. Cria o Laser
+            if (levelData.emitter) {
+                this.laserModel = new LaserModel(this.scene, levelData.emitter.x, levelData.emitter.z, levelData.emitter.rotationY);
+            }
+
+            // 2. Cria os Alvos
+            levelData.targets?.forEach((t: any, i: number) => {
+                this.targets.push(new TargetModel(this.scene, i, t.x, t.z, t.radius || 0.65));
+            });
+
+            // 3. Cria os Espelhos
+            levelData.mirrors?.forEach((m: any, i: number) => {
+                this.mirrors.push(new MirrorModel(this.scene, i, m.x, m.z, m.ry, m.length || 3.0));
+            });
+
+            // 4. Cria os Splitters
+            levelData.splitters?.forEach((s: any, i: number) => {
+                this.splitters.push(new SplitterModel(this.scene, i, s.x, s.z, s.ry, s.length || 3.0));
+            });
+
+            // 5. Cria os Vidros
+            levelData.glasses?.forEach((g: any, i: number) => {
+                this.glasses.push(new GlassModel(this.scene, i, g.x, g.z, g.rotationY || 0, g.width, g.depth, g.refractionIndex || 1.5));
+            });
+
+            // Força a Óptica a desenhar os raios da nova fase
+            this.triggerRecalculation();
+
+        } catch (error) {
+            console.error("Erro ao ler levels.json:", error);
+        }
     }
 
     public setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, intRef: number) => void): void {
@@ -84,22 +130,17 @@ export class Model implements IModel {
     }
 
     public updateGameState(isWin: boolean, reflections: number, refractions: number, internalReflections: number): void {
-        // Calcula a pontuação atual
         const currentScore = (reflections * 10) + (refractions * 20) + (internalReflections * 50);
 
-        // Atualiza a tela (Placar ao Vivo)
         if (this.scoreUpdateCallback) {
             this.scoreUpdateCallback(currentScore, reflections, refractions, internalReflections);
         }
 
-        // Verifica a Condição de Vitória
         if (isWin && !this.endGAme) {
-            this.endGAme = true; // Impede disparos múltiplos
+            this.endGAme = true; 
             
-            // Salva o maior score alcançado nesta fase
             this.levelScores[this.currentLevelIndex] = Math.max(this.levelScores[this.currentLevelIndex], currentScore);
             
-            // Desbloqueia a próxima fase
             if (this.currentLevelIndex + 1 >= this.unlockedLevels && this.unlockedLevels < 12) {
                 this.unlockedLevels = this.currentLevelIndex + 2; 
             }
@@ -114,18 +155,6 @@ export class Model implements IModel {
                 this.endGameCallback(false);
             }
         }
-    }
-
-    private createMirrors(): void {
-        const defs = [
-            { x: 0, z: -4, ry: Math.PI / 4 },
-            { x: -5, z: -4, ry: -Math.PI / 4 },
-            { x: -5, z: 6, ry: -Math.PI / 4 },
-        ];
-
-        defs.forEach((def, index) => {
-            this.mirrors.push(new MirrorModel(this.scene, index, def.x, def.z, def.ry));
-        });
     }
 
     public getTargets(): TargetModel[] { return this.targets; }

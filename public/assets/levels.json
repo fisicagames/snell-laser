@@ -1,0 +1,33 @@
+[
+{
+    "name": "Level 1 - O Básico",
+    "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
+    "targets":[
+      { "x": 0, "z": 12, "radius": 0.65 }
+    ],
+    "mirrors":[
+      { "x": 0, "z": -4, "ry": 0.785398 },
+      { "x": -5, "z": -4, "ry": -0.785398 },
+      { "x": -5, "z": 6, "ry": -0.785398 }
+    ],
+    "splitters":[
+      { "x": 0, "z": 0, "ry": 0.785398 }
+    ],
+    "glasses":[
+      { "x": 0, "z": 5, "rotationY": 0, "width": 6, "depth": 2, "refractionIndex": 1.5 }
+    ]
+  },
+  {
+    "name": "Level 2 - Reflexão Dupla",
+    "emitter": { "x": 4, "z": -12, "rotationY": -1.570796 },
+    "targets":[
+      { "x": -4, "z": 12, "radius": 0.65 }
+    ],
+    "mirrors":[
+      { "x": 4, "z": 0, "ry": 0.785398 },
+      { "x": -4, "z": 0, "ry": -0.785398 }
+    ],
+    "splitters": [],
+    "glasses":[]
+  }
+]

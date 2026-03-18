@@ -198,6 +198,9 @@ export class View implements IView {
     public hideLevelSelectionPanel(): void {
         this.rectangleAviso.isVisible = false;
     }
+    public showLevelSelectionPanel(): void {
+        this.rectangleAviso.isVisible = true;
+    }
 
     public updateMainMenuVisibility(isVisible: boolean) {
         this.rectangleMenu.isVisible = isVisible;
