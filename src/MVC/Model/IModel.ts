@@ -3,6 +3,7 @@ import { TargetModel } from "./TargetModel";
 import { SplitterModel } from "./SplitterModel";
 import { GlassModel } from "./GlassModel";
 import { LaserModel } from "./LaserModel";
+import { BlockModel } from "./BlockModel";
 
 export interface IModel {
     toggleMusicPlayback(): void;
@@ -19,6 +20,7 @@ export interface IModel {
     getSplitters(): SplitterModel[];
     getGlasses(): GlassModel[];
     getLaser(): LaserModel;
+    getBlocks(): BlockModel[];
 
     triggerRecalculation(): void;
 

@@ -7,6 +7,7 @@ import { LaserModel } from "./LaserModel";
 import { TargetModel } from "./TargetModel";
 import { SplitterModel } from "./SplitterModel";
 import { GlassModel } from "./GlassModel";
+import { BlockModel } from "./BlockModel"; 
 import { OpticsEngine } from "./OpticsEngine";
 
 export class Model implements IModel {
@@ -24,6 +25,7 @@ export class Model implements IModel {
     private targets: TargetModel[] = [];
     private splitters: SplitterModel[] =[];
     private glasses: GlassModel[] =[];
+    private blocks: BlockModel[] =[]; 
     private laserModel!: LaserModel;
 
     private opticsEngine!: OpticsEngine; 
@@ -67,11 +69,13 @@ export class Model implements IModel {
         this.mirrors.forEach(m => m.root.dispose());
         this.splitters.forEach(s => s.root.dispose());
         this.glasses.forEach(g => g.root.dispose());
+        this.blocks.forEach(b => b.root.dispose());
 
         this.targets = [];
         this.mirrors =[];
         this.splitters = [];
         this.glasses =[];
+        this.blocks =[]; 
     }
 
     // Assíncrono: Baixa o JSON e constrói a fase lendo ele
@@ -82,7 +86,9 @@ export class Model implements IModel {
         try {
             // Só baixa o arquivo na primeira vez
             if (this.levelsData.length === 0) {
-                const response = await fetch('./assets/levels.json');
+                // ATUALIZADO: Adicionamos o getTime() para forçar o celular a ignorar o cache!
+                const cacheBuster = new Date().getTime();
+                const response = await fetch(`./assets/levels.json?v=${cacheBuster}`);
                 this.levelsData = await response.json();
             }
 
@@ -118,6 +124,11 @@ export class Model implements IModel {
             levelData.glasses?.forEach((g: any, i: number) => {
                 this.glasses.push(new GlassModel(this.scene, i, g.x, g.z, g.rotationY || 0, g.width, g.depth, g.refractionIndex || 1.5));
             });
+
+            // 6. NOVO: Cria os Obstáculos Opacos (Blocos)
+            levelData.blocks?.forEach((b: any, i: number) => {
+                this.blocks.push(new BlockModel(this.scene, i, b.x, b.z, b.rotationY || 0, b.width, b.depth));
+            });            
 
             // Força a Óptica a desenhar os raios da nova fase
             this.triggerRecalculation();
@@ -163,6 +174,7 @@ export class Model implements IModel {
     public getMirrors(): MirrorModel[] { return this.mirrors; }
     public getSplitters(): SplitterModel[] { return this.splitters; }
     public getGlasses(): GlassModel[] { return this.glasses; }
+    public getBlocks(): BlockModel[] { return this.blocks; }
     public getLaser(): LaserModel { return this.laserModel; }
 
 

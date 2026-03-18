@@ -233,6 +233,17 @@ export class OpticsEngine {
                     }
                 }
 
+                // --- NOVO: Teste de Colisão: Blocos Opacos (Obstáculos) ---
+                for (const blk of this.gameModel.getBlocks()) {
+                    const obb = blk.getOBB();
+                    const hit = this.hitOBB(o, d, obb.center, obb.angle, obb.halfW, obb.halfD);
+                    if (hit && hit.tEn > 1e-4 && hit.tEn < bestT) {
+                        bestT = hit.tEn; 
+                        bestKind = 'block'; 
+                        bestData = blk;
+                    }
+                }
+
                 for (const tg of this.gameModel.getTargets()) {
                     const dtx = tg.x - o.x, dtz = tg.z - o.z;
                     const tp = this.dot2(this.v2(dtx, dtz), d);
@@ -254,6 +265,7 @@ export class OpticsEngine {
 
                 if (bestKind === 'target') { hitSet.add(bestData); normals.push(null); break; }
                 if (bestKind === 'wall') { normals.push(null); break; }
+                if (bestKind === 'block') { normals.push(null); break; } 
 
                 if (bestKind === 'mirror') {
                     reflectionsCount++; 
