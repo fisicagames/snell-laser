@@ -26,7 +26,8 @@ export class LanguageSwitcher {
             ButtonEfeitoSuave: ["Efeito Suave","Soft Effect"],
             ButtonEfeitoIntenso: ["Efeito Intenso","Intense Effect"],
             TextblockGraph: ["Diagrama PxV", "PxV Diagram"],
-            ButtonMenuPlay: ["Jogar", "Play"]
+            ButtonMenuPlay: ["Jogar", "Play"],
+            ButtonResetProgress: ["Zerar Progresso", "Reset Progress"]
         };
     }
 

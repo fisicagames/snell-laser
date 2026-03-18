@@ -34,13 +34,14 @@ export class Controller {
         this.model.setScoreUpdateCallback((score: number, reflections: number, refractions: number, internalReflections: number) => {
             this.view.updateScoreText(score, reflections, refractions, internalReflections);
         });
+        this.view.updateTotalBestScore(this.model.getTotalBestScore());
 
         // Quando o jogador vence o nível (atinge todos os alvos)
         this.model.setEndGameCallback((isVisible: boolean) => {
             this.view.showEndGamePanel(isVisible);
-            
-            // Opcional: Aqui você pode colocar um setTimeout para voltar
-            // automaticamente para a Seleção de Nível após alguns segundos de vitória!
+            if (isVisible) {
+                this.view.updateTotalBestScore(this.model.getTotalBestScore());
+            }
         });
 
         this.highlightActiveElement();
@@ -51,10 +52,10 @@ export class Controller {
 
     private getInteractables(): InteractableElement[] {
         // Agora os Blocos de Vidro também podem ser selecionados e girados!
-        return[
-            ...this.model.getMirrors(), 
+        return [
+            ...this.model.getMirrors(),
             ...this.model.getSplitters(),
-            ...this.model.getGlasses() 
+            ...this.model.getGlasses()
         ];
     }
 
@@ -191,6 +192,18 @@ export class Controller {
         this.view.onButtonMenu(() => this.showMenu());
         this.view.onToggleMusic(() => this.toggleMusic());
         this.view.onButtonLang(() => this.changeLanguage());
+
+        this.view.onButtonResetProgress(() => {
+            // Opcional: Adicionar um confirm nativo do navegador para segurança
+            //const confirmText = this.view.advancedTexture.getControlByName("ButtonLang")?.metadata === 0 ?
+            //    "Deseja apagar todo o progresso?" : "Reset all progress?";
+
+            this.model.resetProgress();
+
+            // Atualiza a interface imediatamente após o reset
+            this.view.updateTotalBestScore(this.model.getTotalBestScore());
+            this.view.updateLevelButtons(this.model.getUnlockedLevels(), this.model.getLevelScores());
+        });
     }
 
     private startGame(levelIndex: number): void {
@@ -202,17 +215,24 @@ export class Controller {
         this.highlightActiveElement();
     }
 
-    private showLevelSelectionPanel(){
+    private showLevelSelectionPanel() {
+        // 1. Busca e envia a pontuação total somada para a View
+        this.view.updateTotalBestScore(this.model.getTotalBestScore());
+
+        // 2. Atualiza os botões (cadeados e pontos individuais)
         this.view.updateLevelButtons(this.model.getUnlockedLevels(), this.model.getLevelScores());
+
+        // 3. Mostra o painel
         this.view.showLevelSelectionPanel();
     }
-    
+
     private continueGame() {
         this.view.updateMainMenuVisibility(false);
         this.view.showEndGamePanel(false);
     }
 
     private showMenu(): void {
+        this.view.updateTotalBestScore(this.model.getTotalBestScore());
         this.view.updateMainMenuVisibility(true);
     }
 

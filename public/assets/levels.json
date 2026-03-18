@@ -1,36 +1,227 @@
 [
 {
-    "name": "Level 1 - O Básico",
+    "name": "Nível 1 - Primeiro Contato",
     "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
     "targets":[
-      { "x": 0, "z": 12, "radius": 0.65 }
+      { "x": 5, "z": 10, "radius": 0.65 }
     ],
     "mirrors":[
-      { "x": 0, "z": -4, "ry": 0.785398 },
-      { "x": -5, "z": -4, "ry": -0.785398 },
-      { "x": -5, "z": 6, "ry": -0.785398 }
+      { "x": 0, "z": 0, "ry": -0.2, "length": 3.0 }
     ],
-    "splitters":[
-      { "x": 0, "z": 0, "ry": 0.785398 }
-    ],
-    "glasses":[
-      { "x": 0, "z": 5, "rotationY": 0, "width": 6, "depth": 2, "refractionIndex": 1.5 }
-    ]
+    "splitters": [],
+    "glasses": [],
+    "blocks":[]
   },
   {
-    "name": "Level 2 - Reflexão Dupla",
+    "name": "Nível 2 - Desvio Rápido",
     "emitter": { "x": 4, "z": -12, "rotationY": -1.570796 },
     "targets":[
-      { "x": -4, "z": 12, "radius": 0.65 }
+      { "x": 4, "z": 6, "radius": 0.65 }
     ],
     "mirrors":[
-      { "x": 4, "z": 0, "ry": 0.785398 },
-      { "x": -4, "z": 0, "ry": -0.785398 }
+      { "x": 4, "z": -6, "ry": -0.2, "length": 3.0 },
+      { "x": -4, "z": -6, "ry": 0.1, "length": 3.0 },
+      { "x": -4, "z": 6, "ry": 0.3, "length": 3.0 }
     ],
     "blocks":[
-      { "x": 0, "z": -1, "rotationY": 0, "width": 3, "depth": 1 }
+      { "x": 4, "z": 0, "rotationY": 0, "width": 4, "depth": 2 }
     ],
     "splitters": [],
     "glasses":[]
+  },
+  {
+    "name": "Nível 3 - O Labirinto",
+    "emitter": { "x": -6, "z": -12, "rotationY": -1.570796 },
+    "targets":[
+      { "x": 6, "z": 6, "radius": 0.65 }
+    ],
+    "mirrors":[
+      { "x": -6, "z": -8, "ry": 0.1, "length": 3.0 },
+      { "x": 6, "z": -8, "ry": 0.4, "length": 3.0 },
+      { "x": 6, "z": -2, "ry": -0.2, "length": 3.0 },
+      { "x": -6, "z": -2, "ry": 0.1, "length": 3.0 },
+      { "x": -6, "z": 6, "ry": -0.3, "length": 3.0 }
+    ],
+    "blocks":[
+      { "x": -2, "z": -5, "rotationY": 0, "width": 10, "depth": 2 },
+      { "x": 2, "z": 2, "rotationY": 0, "width": 10, "depth": 2 }
+    ],
+    "splitters": [],
+    "glasses":[]
+  },
+  {
+    "name": "Nível 4 - Ilusão de Óptica",
+    "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
+    "targets":[
+      { "x": 2, "z": 8, "radius": 0.65 }
+    ],
+    "mirrors": [],
+    "blocks":[
+      { "x": -2, "z": 8, "rotationY": 0, "width": 3, "depth": 1 }
+    ],
+    "splitters": [],
+    "glasses":[
+      { "x": 0, "z": -2, "rotationY": 0, "width": 6, "depth": 3, "refractionIndex": 1.5 }
+    ]
+  },
+  {
+    "name": "Nível 5 - Dividir para Conquistar",
+    "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
+    "targets":[
+      { "x": 0, "z": 8, "radius": 0.65 },
+      { "x": 6, "z": 8, "radius": 0.65 }
+    ],
+    "mirrors":[
+      { "x": 6, "z": -4, "ry": 0.1, "length": 3.0 }
+    ],
+    "blocks": [],
+    "splitters":[
+      { "x": 0, "z": -4, "ry": -0.2, "length": 3.0 }
+    ],
+    "glasses":[]
+  },
+  {
+    "name": "Nível 6 - A Bifurcação",
+    "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
+    "targets": [
+      { "x": -6, "z": 10, "radius": 0.65 },
+      { "x": 6, "z": 10, "radius": 0.65 }
+    ],
+    "mirrors": [
+      { "x": 6, "z": -6, "ry": -0.785, "length": 3.0 },
+      { "x": 0, "z": 4, "ry": 0.785, "length": 3.0 },
+      { "x": -6, "z": 4, "ry": -0.785, "length": 3.0 }
+    ],
+    "splitters": [
+      { "x": 0, "z": -6, "ry": 0.785, "length": 3.0 }
+    ],
+    "glasses": [],
+    "blocks": [
+      { "x": 0, "z": 10, "rotationY": 0, "width": 4, "depth": 1 }
+    ],
+    "comment": "O Splitter divide o raio: o refletido vai para a direita (Mirror 1) e o transmitido segue reto até o Mirror 2, que o joga para o Mirror 3."
+  },
+  {
+    "name": "Nível 7 - O Desvio em Degraus",
+    "emitter": { "x": -4, "z": -12, "rotationY": -1.570796 },
+    "targets": [
+      { "x": -4, "z": 10, "radius": 0.65 }
+    ],
+    "mirrors": [
+      { "x": -4, "z": -4, "ry": 0.785, "length": 3.0 },
+      { "x": 4, "z": 2, "ry": -0.785, "length": 3.0 }
+    ],
+    "blocks": [
+      { "x": -1, "z": 0, "rotationY": 0, "width": 8, "depth": 1 }
+    ],
+    "splitters": [],
+    "glasses": [
+      { "x": 0, "z": -4, "rotationY": 1.57, "width": 4, "depth": 2, "refractionIndex": 1.5 }
+    ]
+  },
+  {
+    "name": "Nível 8 - Desvio em Cascata",
+    "emitter": { "x": -6, "z": -12, "rotationY": -1.570796 },
+    "targets": [
+      { "x": 6, "z": 12, "radius": 0.65 }
+    ],
+    "mirrors": [
+      { "x": -6, "z": -5, "ry": 0.785, "length": 3.0 },
+      { "x": 6, "z": 5, "ry": -0.785, "length": 3.0 }
+    ],
+    "blocks": [
+      { "x": -1, "z": -5, "rotationY": 0, "width": 10, "depth": 1 },
+      { "x": 1, "z": 5, "rotationY": 0, "width": 10, "depth": 1 }
+    ],
+    "glasses": [
+      { "x": 0, "z": 0, "rotationY": 0, "width": 4, "depth": 2, "refractionIndex": 1.6 }
+    ],
+    "comment": "O laser deve contornar os dois muros. O vidro no centro serve para deslocar o feixe lateralmente e alinhar com o segundo espelho."
+  },
+  {
+    "name": "Nível 9 - Árvore Binária",
+    "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
+    "targets": [
+      { "x": -6, "z": 10, "radius": 0.65 },
+      { "x": 0, "z": 10, "radius": 0.65 },
+      { "x": 6, "z": 10, "radius": 0.65 }
+    ],
+    "mirrors": [
+      { "x": -6, "z": 0, "ry": -0.785, "length": 3.0 },
+      { "x": 6, "z": 0, "ry": 0.785, "length": 3.0 }
+    ],
+    "blocks": [],
+    "splitters": [
+      { "x": 0, "z": -6, "ry": 0.785, "length": 3.0 },
+      { "x": 0, "z": 2, "ry": -0.785, "length": 3.0 }
+    ],
+    "glasses": [],
+    "comment": "O jogador deve usar dois Splitters em sequência para criar três feixes distintos e atingir os três alvos no topo."
+  },
+  {
+    "name": "Nível 10 - Densidade Crítica",
+    "emitter": { "x": 0, "z": -14, "rotationY": -1.570796 },
+    "targets": [
+      { "x": 0, "z": 12, "radius": 0.5 }
+    ],
+    "mirrors": [],
+    "blocks": [
+      { "x": -4, "z": 0, "rotationY": 0, "width": 6, "depth": 1 },
+      { "x": 4, "z": 0, "rotationY": 0, "width": 6, "depth": 1 }
+    ],
+    "splitters": [],
+    "glasses": [
+      { "x": 0, "z": -6, "rotationY": 0, "width": 8, "depth": 2, "refractionIndex": 1.3 },
+      { "x": 0, "z": 0, "rotationY": 0, "width": 2, "depth": 4, "refractionIndex": 1.9 },
+      { "x": 0, "z": 6, "rotationY": 0, "width": 8, "depth": 2, "refractionIndex": 1.3 }
+    ],
+    "comment": "Desafio educativo: alinhar três blocos de índices diferentes para que o desvio final resulte em uma trajetória reta."
+  },
+  {
+    "name": "Nível 11 - O Tridente de Vidro",
+    "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
+    "targets": [
+      { "x": -5, "z": 12, "radius": 0.65 },
+      { "x": 5, "z": 12, "radius": 0.65 }
+    ],
+    "mirrors": [
+      { "x": -5, "z": 0, "ry": 0, "length": 3.0 },
+      { "x": 5, "z": 0, "ry": 0, "length": 3.0 }
+    ],
+    "blocks": [
+      { "x": 0, "z": 4, "rotationY": 0, "width": 2, "depth": 8 }
+    ],
+    "splitters": [
+      { "x": 0, "z": -4, "ry": 0.785, "length": 3.0 }
+    ],
+    "glasses": [
+      { "x": -3, "z": 6, "rotationY": 0.2, "width": 4, "depth": 2, "refractionIndex": 1.5 },
+      { "x": 3, "z": 6, "rotationY": -0.2, "width": 4, "depth": 2, "refractionIndex": 1.5 }
+    ],
+    "comment": "Um splitter divide o feixe para dois caminhos simétricos, cada um com um bloco de vidro que deve ser ajustado."
+  },
+  {
+    "name": "Nível 12 - Mestre da Óptica",
+    "emitter": { "x": -7, "z": -14, "rotationY": 0 },
+    "targets": [
+      { "x": 0, "z": 13, "radius": 0.65 },
+      { "x": 7, "z": -14, "radius": 0.65 }
+    ],
+    "mirrors": [
+      { "x": 7, "z": 13, "ry": 0.785, "length": 3.0 },
+      { "x": -7, "z": 13, "ry": -0.785, "length": 3.0 }
+    ],
+    "blocks": [
+      { "x": 0, "z": 0, "rotationY": 0.785, "width": 4, "depth": 4 }
+    ],
+    "splitters": [
+      { "x": 0, "z": -14, "ry": 0.785, "length": 3.0 }
+    ],
+    "glasses": [
+      { "x": 0, "z": 7, "rotationY": 0, "width": 6, "depth": 2, "refractionIndex": 1.6 },
+      { "x": 4, "z": 0, "rotationY": 1.57, "width": 4, "depth": 2, "refractionIndex": 1.4 },
+      { "x": -4, "z": 0, "rotationY": 1.57, "width": 4, "depth": 2, "refractionIndex": 1.4 }
+    ],
+    "comment": "O grande final: exige o uso coordenado de reflexão, refração e divisão de feixe para cercar o obstáculo central."
   }
 ]

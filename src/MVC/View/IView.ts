@@ -14,6 +14,8 @@ export interface IView {
     updateLevelButtons(unlockedLevels: number, scores: number[]): void;
     hideLevelSelectionPanel(): void;
     showLevelSelectionPanel(): void; 
+    updateTotalBestScore(totalScore: number): void;
+    onButtonResetProgress(callback: () => void): void;
     // ---------------------------------------------
 
     setButtonUpUpCallback(callback: () => void): void;

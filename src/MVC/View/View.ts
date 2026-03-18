@@ -1,6 +1,6 @@
 // src\View\View.ts
 import { Scene } from "@babylonjs/core";
-import { AdvancedDynamicTexture, Button, Rectangle, TextBlock, Grid } from "@babylonjs/gui";
+import { AdvancedDynamicTexture, Button, Rectangle, TextBlock, Grid, Control } from "@babylonjs/gui";
 import { IView } from "./IView";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { EndGamePhrases } from "./EndGamePhrases";
@@ -45,10 +45,12 @@ export class View implements IView {
     private firstTime: boolean = true;
     private textblockMenuLevel!: TextBlock;
     private textblockGraph!: TextBlock;
+    private buttonResetProgress!: Button;
+
 
     // Elementos do Grid de Fases
-    private levelButtons: Button[] =[];
-    private levelScoreTexts: TextBlock[] =[];
+    private levelButtons: Button[] = [];
+    private levelScoreTexts: TextBlock[] = [];
     private onLevelSelectCallback: ((levelIndex: number) => void) | null = null;
 
     constructor(scene: Scene, advancedTexture: AdvancedDynamicTexture) {
@@ -109,6 +111,42 @@ export class View implements IView {
         });
 
         this.setupLevelGrid();
+
+        this.createResetButton();
+    }
+
+    private createResetButton() {
+        this.buttonResetProgress = Button.CreateSimpleButton("ButtonResetProgress", "Zerar Progresso");
+        this.buttonResetProgress.width = "180px";
+        this.buttonResetProgress.height = "35px";
+        this.buttonResetProgress.color = "white";
+        this.buttonResetProgress.background = "#d9534f"; // Vermelho para alerta
+        this.buttonResetProgress.cornerRadius = 5;
+        this.buttonResetProgress.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+        this.buttonResetProgress.top = "-15px"; // Distância do fundo
+
+        // Adiciona ao painel principal de avisos
+        this.rectangleAviso.addControl(this.buttonResetProgress);
+    }
+
+    public onButtonResetProgress(callback: () => void): void {
+        this.buttonResetProgress.onPointerUpObservable.add(callback);
+    }
+
+
+    public updateTotalBestScore(totalScore: number): void {
+        const prefix = this.languageSwitcher.languageOption === 0 ? "Total: " : "Total: ";
+        const formattedScore = `${totalScore.toFixed(0)} pts`;
+
+        // Atualiza o texto no Menu Principal
+        this.textblockMenuBest.text = `${prefix}${formattedScore}`;
+
+        // ATUALIZADO: Atualiza o texto dentro do painel RectangleAviso (Seleção de Fases)
+        if (this.textblockAviso) {
+            this.textblockAviso.text = `${prefix}${formattedScore}`;
+        }
+
+        this.getBestScoreDisplay(totalScore);
     }
 
     private setupLevelGrid() {
@@ -293,7 +331,7 @@ export class View implements IView {
         } else { // Inglês
             this.textblockLevel.text = `Reflections (x10): ${reflections} | Refractions (x20): ${refractions} \n Total Internal Reflections (x50): ${internalReflections}\n Score: ${reflections}x10 + ${refractions}x20 + ${internalReflections}x50 = ${score} ⭐`;
         }
-        
+
         // Atualiza o recorde do nível atual se aplicável
         if (this.topScore < score) {
             this.topScore = score;

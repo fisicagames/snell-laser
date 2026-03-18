@@ -27,4 +27,8 @@ export interface IModel {
     getUnlockedLevels(): number;
     getLevelScores(): number[];
     loadLevel(levelIndex: number): Promise<void>;
+    getTotalBestScore(): number;
+
+    resetProgress(): void;
+
 }

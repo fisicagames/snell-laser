@@ -7,41 +7,47 @@ import { LaserModel } from "./LaserModel";
 import { TargetModel } from "./TargetModel";
 import { SplitterModel } from "./SplitterModel";
 import { GlassModel } from "./GlassModel";
-import { BlockModel } from "./BlockModel"; 
+import { BlockModel } from "./BlockModel";
 import { OpticsEngine } from "./OpticsEngine";
 
 export class Model implements IModel {
     private scene: Scene;
     private backgroundMusic?: SoundModel;
     private explosionSound?: SoundModel;
-    private allSounds: SoundModel[] =[];
+    private allSounds: SoundModel[] = [];
     private physicsPlugin: HavokPlugin | null;
     private endGameCallback: ((isVisible: boolean) => void) | null = null;
     public endGAme: boolean = false;
     public updateModels: boolean = false;
 
     private groundModel!: GroundModel;
-    private mirrors: MirrorModel[] =[];
+    private mirrors: MirrorModel[] = [];
     private targets: TargetModel[] = [];
-    private splitters: SplitterModel[] =[];
-    private glasses: GlassModel[] =[];
-    private blocks: BlockModel[] =[]; 
+    private splitters: SplitterModel[] = [];
+    private glasses: GlassModel[] = [];
+    private blocks: BlockModel[] = [];
     private laserModel!: LaserModel;
 
-    private opticsEngine!: OpticsEngine; 
+    private opticsEngine!: OpticsEngine;
     private needsRecalculation: boolean = false;
     private recalcTimer: number = 0;
 
-    private unlockedLevels: number = 1; 
-    private levelScores: number[] = new Array(12).fill(0); 
+    private unlockedLevels: number = 1;
+    private levelScores: number[] = new Array(12).fill(0);
 
     private currentLevelIndex: number = 0;
     private scoreUpdateCallback: ((score: number, ref: number, refr: number, intRef: number) => void) | null = null;
-    
+
     // Cache dos dados das fases do JSON
-    private levelsData: any[] =[];
+    private levelsData: any[] = [];
 
     constructor(scene: Scene, physicsPlugin?: HavokPlugin | null) {
+        const savedScores = localStorage.getItem('snell_laser_scores');
+        if (savedScores) this.levelScores = JSON.parse(savedScores);
+
+        const savedLevels = localStorage.getItem('snell_laser_unlocked');
+        if (savedLevels) this.unlockedLevels = parseInt(savedLevels);
+
         this.scene = scene;
         this.physicsPlugin = physicsPlugin || null;
 
@@ -58,12 +64,25 @@ export class Model implements IModel {
     public getUnlockedLevels(): number { return this.unlockedLevels; }
     public getLevelScores(): number[] { return this.levelScores; }
 
+    public resetProgress(): void {
+        // 1. Reseta variáveis locais
+        this.unlockedLevels = 1;
+        this.levelScores = new Array(12).fill(0);
+        this.endGAme = false;
+
+        // 2. Limpa o armazenamento do navegador
+        localStorage.removeItem('snell_laser_scores');
+        localStorage.removeItem('snell_laser_unlocked');
+
+        // 3. Recarrega a fase 1 por segurança
+        this.loadLevel(0);
+    }
     // Limpa a tela antes de construir uma nova fase
     private clearCurrentLevel(): void {
         if (this.laserModel) {
             this.laserModel.root.dispose();
         }
-        
+
         this.targets.forEach(t => t.dispose());
 
         this.mirrors.forEach(m => m.root.dispose());
@@ -72,10 +91,10 @@ export class Model implements IModel {
         this.blocks.forEach(b => b.root.dispose());
 
         this.targets = [];
-        this.mirrors =[];
+        this.mirrors = [];
         this.splitters = [];
-        this.glasses =[];
-        this.blocks =[]; 
+        this.glasses = [];
+        this.blocks = [];
     }
 
     // Assíncrono: Baixa o JSON e constrói a fase lendo ele
@@ -128,7 +147,7 @@ export class Model implements IModel {
             // 6. NOVO: Cria os Obstáculos Opacos (Blocos)
             levelData.blocks?.forEach((b: any, i: number) => {
                 this.blocks.push(new BlockModel(this.scene, i, b.x, b.z, b.rotationY || 0, b.width, b.depth));
-            });            
+            });
 
             // Força a Óptica a desenhar os raios da nova fase
             this.triggerRecalculation();
@@ -136,6 +155,10 @@ export class Model implements IModel {
         } catch (error) {
             console.error("Erro ao ler levels.json:", error);
         }
+    }
+
+    public getTotalBestScore(): number {
+        return this.levelScores.reduce((acumulador, valorAtual) => acumulador + valorAtual, 0);
     }
 
     public setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, intRef: number) => void): void {
@@ -150,18 +173,21 @@ export class Model implements IModel {
         }
 
         if (isWin && !this.endGAme) {
-            this.endGAme = true; 
-            
+            this.endGAme = true;
+
             this.levelScores[this.currentLevelIndex] = Math.max(this.levelScores[this.currentLevelIndex], currentScore);
-            
+
+            localStorage.setItem('snell_laser_scores', JSON.stringify(this.levelScores));
+            localStorage.setItem('snell_laser_unlocked', this.unlockedLevels.toString());
+
             if (this.currentLevelIndex + 1 >= this.unlockedLevels && this.unlockedLevels < 12) {
-                this.unlockedLevels = this.currentLevelIndex + 2; 
+                this.unlockedLevels = this.currentLevelIndex + 2;
             }
 
             if (this.endGameCallback) {
                 this.endGameCallback(true);
             }
-        } 
+        }
         else if (!isWin && this.endGAme) {
             this.endGAme = false;
             if (this.endGameCallback) {
@@ -207,7 +233,7 @@ export class Model implements IModel {
         this.allSounds.push(this.explosionSound);
     }
 
-public triggerRecalculation(): void {
+    public triggerRecalculation(): void {
         this.needsRecalculation = true;
     }
 
