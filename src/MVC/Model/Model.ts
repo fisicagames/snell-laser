@@ -61,7 +61,9 @@ export class Model implements IModel {
         if (this.laserModel) {
             this.laserModel.root.dispose();
         }
-        this.targets.forEach(t => t.root.dispose());
+        
+        this.targets.forEach(t => t.dispose());
+
         this.mirrors.forEach(m => m.root.dispose());
         this.splitters.forEach(s => s.root.dispose());
         this.glasses.forEach(g => g.root.dispose());
