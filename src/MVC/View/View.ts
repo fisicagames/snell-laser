@@ -21,7 +21,6 @@ export class View implements IView {
     private rectangleTouch!: Rectangle;
     private rectangleTop!: Rectangle;
     public textblockMenuMusic!: TextBlock;
-    private isMusicOn: boolean = true;
     private buttonLang!: Button;
     private languageSwitcher: LanguageSwitcher;
     private buttonUp!: Button;
@@ -287,7 +286,6 @@ export class View implements IView {
     public onToggleMusic(callback: () => void): void {
         this.textblockMenuMusic.onPointerUpObservable.add(() => {
             callback(); // Chama o callback passado
-            this.toggleMusicIcon(); // Atualiza o ícone da música
         });
     }
 
@@ -295,9 +293,8 @@ export class View implements IView {
         this.buttonLang.onPointerUpObservable.add(callback);
     }
 
-    public toggleMusicIcon(): void {
-        this.isMusicOn = !this.isMusicOn;
-        this.textblockMenuMusic.text = this.isMusicOn ? "🔊" : "🔈";
+    public setMusicIcon(isEnabled: boolean): void {
+        this.textblockMenuMusic.text = isEnabled ? "🔊" : "🔈";
     }
 
     public setButtonUpUpCallback(callback: () => void): void {

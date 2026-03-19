@@ -263,6 +263,10 @@ export class Model implements IModel {
         }
     }
 
+    public isMusicEnabled(): boolean {
+        return SoundModel.isMusicEnabled;
+    }
+
     public setEndGameCallback(callback: (isVisible: boolean) => void): void {
         this.endGameCallback = callback;
     }

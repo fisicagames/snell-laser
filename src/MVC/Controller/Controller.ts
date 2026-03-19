@@ -48,6 +48,9 @@ export class Controller {
 
         // Inicia o loop contínuo de checagens (câmera suave e rotação contínua)
         this.update();
+
+        this.view.setMusicIcon(this.model.isMusicEnabled());
+
     }
 
     private getInteractables(): InteractableElement[] {
@@ -148,12 +151,12 @@ export class Controller {
         if (interactables.length === 0) return;
 
         const activeElement = interactables[this.activeElementIndex];
-        
+
         // NOVO: Pegamos a lista completa de alvos, não apenas o primeiro
         const targets = this.model.getTargets();
 
         const camera = this.scene.activeCamera as UniversalCamera;
-        
+
         if (camera && activeElement) {
             // Passamos a lista de targets para o CameraController
             CameraController.updatePosition(camera, activeElement.root, targets);
@@ -192,7 +195,13 @@ export class Controller {
         this.view.onButtonMenuContinuar(() => this.showLevelSelectionPanel());
 
         this.view.onButtonMenu(() => this.showMenu());
-        this.view.onToggleMusic(() => this.toggleMusic());
+
+        this.view.onToggleMusic(() => {
+            this.model.toggleMusicPlayback(); // Inverte no Model
+            const actualState = this.model.isMusicEnabled(); // Pega o estado real
+            this.view.setMusicIcon(actualState); // Atualiza a View com a verdade
+        });
+
         this.view.onButtonLang(() => this.changeLanguage());
 
         this.view.onButtonResetProgress(() => {

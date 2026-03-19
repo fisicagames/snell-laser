@@ -7,6 +7,7 @@ export interface IView {
     onButtonMenu(callback: () => void): void;
     onButtonMenuContinuar(callback: () => void): void;
     onToggleMusic(callback: () => void): void;
+    setMusicIcon(isEnabled: boolean): void; 
     onButtonLang(callback: () => void): void;
 
     // --- Novos métodos para a Seleção de Fases ---
