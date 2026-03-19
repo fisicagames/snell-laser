@@ -370,11 +370,11 @@ export class View implements IView {
         } else if (score < 700) {
             this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Professor de Física 🧑‍🏫" : "Physics Professor 🧑‍🏫";
         } else if (score < 710) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Professor de Termodinâmica 🔥" : "Thermodynamics Professor 🔥";
+            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Professor de Óptica 🎓" : "Optics Professor 🎓";
         } else if (score < 720) {
             this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Gênio da Física 🧠" : "Physics Genius 🧠";
         } else {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Nicolas Léonard Sadi Carnot ⚙️" : "Nicolas Léonard Sadi Carnot ⚙️";
+            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Willebrord Snellius ✨" : "Willebrord Snellius ✨";
         }
     }
 
