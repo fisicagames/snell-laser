@@ -66,7 +66,7 @@ export class GlassModel {
         const mat = this.mesh.material as StandardMaterial;
         if (mat) {
             // Fica com azul neon/brilhante quando selecionado
-            mat.emissiveColor = isHighlighted ? new Color3(0.1, 0.5, 1.0) : new Color3(0.04, 0.18, 0.42);
+            mat.emissiveColor = isHighlighted ? new Color3(0.08, 0.4, 0.8) : new Color3(0.04, 0.18, 0.42);
         }
     }
 
