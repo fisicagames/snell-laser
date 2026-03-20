@@ -177,22 +177,31 @@
     "comment": "O Splitter joga a luz para os espelhos inferiores. Eles atiram a luz em 'X' através do grande bloco de vidro central. Ajuste o vidro para que a refração guie os dois feixes cruzados para os espelhos superiores."
   },    
   {
-    "name": "Nível 9 - O V de Refração",
-    "emitter": { "x": 0, "z": -12, "rotationY": -1.570796 },
-    "targets": [ 
-      { "x": -4, "z": 8, "radius": 0.65 }, 
-      { "x": 4, "z": 8, "radius": 0.65 } ],
-    "splitters": [ { "x": 0, "z": -4, "ry": 0.785, "length": 2.5 } ],
-    "mirrors": [
-      { "x": -4, "z": -4, "ry": -0.785, "length": 2.5 },
-      { "x": 4, "z": -4, "ry": 0.785, "length": 2.5 }
+    "name": "Nível 9 - O Ajuste Fino",
+    "emitter": { "x": 0, "z": -13, "rotationY": -1.570796 },
+    "targets":[ 
+      { "x": -1.4, "z": 9, "radius": 0.65 }, 
+      { "x": 1.4, "z": 9, "radius": 0.65 } 
     ],
-    "glasses": [
-      { "x": -4, "z": 2, "rotationY": 0.5, "width": 2, "depth": 3, "refractionIndex": 1.5 },
-      { "x": 4, "z": 2, "rotationY": -0.5, "width": 2, "depth": 3, "refractionIndex": 1.5 }
+    "splitters":[ 
+      { "x": 0, "z": -10, "ry": 1.57, "length": 2.5 } 
     ],
-    "blocks": [],
-    "comment": "Um V perfeito. O splitter manda para os espelhos, que alinham os lasers através dos blocos de vidro inclinados."
+    "mirrors":[
+      { "x": 2.5, "z": -10, "ry": 1.57, "length": 2.5 },
+      { "x": 0, "z": -7, "ry": 1.57, "length": 2.5 },
+      { "x": -2.5, "z": -7, "ry": 1.57, "length": 2.5 }
+    ],
+    "glasses":[
+      { "x": -2.5, "z": 0, "rotationY": 1.57, "width": 3, "depth": 4, "refractionIndex": 1.6 },
+      { "x": 2.5, "z": 0, "rotationY": 1.57, "width": 3, "depth": 4, "refractionIndex": 1.6 }
+    ],
+    "blocks":[
+      { "x": -2.5, "z": 5, "rotationY": 0, "width": 1.5, "depth": 1 },
+      { "x": 2.5, "z": 5, "rotationY": 0, "width": 1.5, "depth": 1 },
+      { "x": 0, "z": 5, "rotationY": 0, "width": 1.8, "depth": 1 },
+      { "x": 0, "z": 0, "rotationY": 0, "width": 0.5, "depth": 6 }
+    ],
+    "comment": "Os obstáculos bloqueiam o caminho reto. Gire os blocos de vidro com precisão: a refração fará o laser dar um 'passo' para o lado (Desvio Lateral) e passar milimetricamente pelas frestas!"
   },
   {
     "name": "Nível 10 - A Miragem",
