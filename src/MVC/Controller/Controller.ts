@@ -34,7 +34,11 @@ export class Controller {
         this.model.setScoreUpdateCallback((score: number, reflections: number, refractions: number, internalReflections: number) => {
             this.view.updateScoreText(score, reflections, refractions, internalReflections);
         });
-        this.view.updateTotalBestScore(this.model.getTotalBestScore());
+
+        const totalAcumulado = this.model.getTotalBestScore();
+        this.view.updateTotalBestScore(totalAcumulado);
+
+
 
         // Quando o jogador vence o nível (atinge todos os alvos)
         this.model.setEndGameCallback((isVisible: boolean) => {

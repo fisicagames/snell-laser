@@ -9,6 +9,7 @@ import { LanguageDetector } from "./LanguageDetector";
 import { translate } from "./translate";
 
 export class View implements IView {
+    private lastTotalScore: number = 0;
     private scene: Scene;
     public advancedTexture: AdvancedDynamicTexture;
     private rectangleMenu!: Rectangle;
@@ -62,6 +63,8 @@ export class View implements IView {
 
     public changeLanguage(): void {
         this.languageSwitcher.changeLanguage(this.advancedTexture);
+        // Após traduzir tudo, forçamos a atualização do rank com o último score guardado
+        this.getBestScoreDisplay(this.lastTotalScore);
     }
 
     private initializeGUI() {
@@ -134,18 +137,19 @@ export class View implements IView {
 
 
     public updateTotalBestScore(totalScore: number): void {
+        this.lastTotalScore = totalScore; // Salva para uso na tradução
+        
         const prefix = this.languageSwitcher.languageOption === 0 ? "Total: " : "Total: ";
         const formattedScore = `${totalScore.toFixed(0)} pts`;
 
-        // Atualiza o texto no Menu Principal
         this.textblockMenuBest.text = `${prefix}${formattedScore}`;
-
-        // ATUALIZADO: Atualiza o texto dentro do painel RectangleAviso (Seleção de Fases)
+        
         if (this.textblockAviso) {
             this.textblockAviso.text = `${prefix}${formattedScore}`;
         }
 
-        this.getBestScoreDisplay(totalScore);
+        // Chama o cálculo do rank
+        this.getBestScoreDisplay(totalScore); 
     }
 
     private setupLevelGrid() {
@@ -323,18 +327,10 @@ export class View implements IView {
     }
 
     public updateScoreText(score: number, reflections: number, refractions: number, internalReflections: number): void {
-        if (this.languageSwitcher.languageOption == 0) { // Português
+        if (this.languageSwitcher.languageOption == 0) {
             this.textblockLevel.text = `Reflexões: ${reflections} | Refrações: ${refractions} \n Reflexões Internas Totais: ${internalReflections}\n Pontos: ${reflections}x10 + ${refractions}x20 + ${internalReflections}x50 = ${score} ⭐`;
-        } else { // Inglês
+        } else {
             this.textblockLevel.text = `Reflections (x10): ${reflections} | Refractions (x20): ${refractions} \n Total Internal Reflections (x50): ${internalReflections}\n Score: ${reflections}x10 + ${refractions}x20 + ${internalReflections}x50 = ${score} ⭐`;
-        }
-
-        // Atualiza o recorde do nível atual se aplicável
-        if (this.topScore < score) {
-            this.topScore = score;
-            if (this.topScore > 3) {
-                this.getBestScoreDisplay(score);
-            }
         }
     }
 
@@ -352,26 +348,28 @@ export class View implements IView {
 
 
     private getBestScoreDisplay(score: number) {
-        let scoreText: string;
+        if (!this.textblockMenuLevel) return;
 
-        if (score < 500) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Iniciante 🐣" : "Beginner 🐣";
-        } else if (score < 540) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Estudante Curioso 🧐" : "Curious Student 🧐";
-        } else if (score < 580) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Estudante Aplicado 📘" : "Dedicated Student 📘";
-        } else if (score < 620) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Universitário Iniciante ✏️" : "Novice University Student ✏️";
-        } else if (score < 660) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Universitário Dedicado 📚" : "Advanced University Student 📚";
-        } else if (score < 700) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Professor de Física 🧑‍🏫" : "Physics Professor 🧑‍🏫";
-        } else if (score < 710) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Professor de Óptica 🎓" : "Optics Professor 🎓";
-        } else if (score < 720) {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Gênio da Física 🧠" : "Physics Genius 🧠";
+        const isPT = this.languageSwitcher.languageOption === 0;
+
+        if (score < 200) {
+            this.textblockMenuLevel.text = isPT ? "Iniciante 🐣" : "Beginner 🐣";
+        } else if (score < 400) {
+            this.textblockMenuLevel.text = isPT ? "Estudante Curioso 🧐" : "Curious Student 🧐";
+        } else if (score < 600) {
+            this.textblockMenuLevel.text = isPT ? "Estudante Aplicado 📘" : "Dedicated Student 📘";
+        } else if (score < 800) {
+            this.textblockMenuLevel.text = isPT ? "Universitário Iniciante ✏️" : "Novice University Student ✏️";
+        } else if (score < 900) {
+            this.textblockMenuLevel.text = isPT ? "Universitário Dedicado 📚" : "Advanced University Student 📚";
+        } else if (score < 1200) {
+            this.textblockMenuLevel.text = isPT ? "Professor de Física 🧑‍🏫" : "Physics Professor 🧑‍🏫";
+        } else if (score < 1500) {
+            this.textblockMenuLevel.text = isPT ? "Professor de Óptica 🎓" : "Optics Professor 🎓";
+        } else if (score < 1800) {
+            this.textblockMenuLevel.text = isPT ? "Gênio da Física 🧠" : "Physics Genius 🧠";
         } else {
-            this.textblockMenuLevel.text = this.languageSwitcher.languageOption === 0 ? "Willebrord Snellius ✨" : "Willebrord Snellius ✨";
+            this.textblockMenuLevel.text = isPT ? "Willebrord Snellius ✨" : "Willebrord Snellius ✨";
         }
     }
 
