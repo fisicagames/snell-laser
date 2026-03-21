@@ -9,10 +9,10 @@ export interface IModel {
     toggleMusicPlayback(): void;
     isMusicEnabled(): boolean;
     // Assinatura garantindo os 4 parâmetros
-    setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, internalReflections: number) => void): void;
-    updateGameState(isWin: boolean, reflections: number, refractions: number, internalReflections: number): void;    
-    
-    setEndGameCallback(callback: (isVisible: boolean) => void): void;  
+    setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, internalReflections: number, currentLevel: number) => void): void;
+    updateGameState(isWin: boolean, reflections: number, refractions: number, internalReflections: number): void;
+
+    setEndGameCallback(callback: (isVisible: boolean) => void): void;
     resetGame(): void;
     updateModels: boolean;
 

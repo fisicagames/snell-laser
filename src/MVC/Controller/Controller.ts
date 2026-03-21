@@ -31,8 +31,8 @@ export class Controller {
         this.inputKeyboardControllerSetup();
         this.inputTouchControllerSetup();
 
-        this.model.setScoreUpdateCallback((score: number, reflections: number, refractions: number, internalReflections: number) => {
-            this.view.updateScoreText(score, reflections, refractions, internalReflections);
+        this.model.setScoreUpdateCallback((score: number, reflections: number, refractions: number, internalReflections: number, currentLevel: number) => {
+            this.view.updateScoreText(score, reflections, refractions, internalReflections, currentLevel);
         });
 
         const totalAcumulado = this.model.getTotalBestScore();

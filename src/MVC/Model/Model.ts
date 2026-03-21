@@ -39,7 +39,7 @@ export class Model implements IModel {
     private levelScores: number[] = new Array(12).fill(0);
 
     private currentLevelIndex: number = 0;
-    private scoreUpdateCallback: ((score: number, ref: number, refr: number, intRef: number) => void) | null = null;
+    private scoreUpdateCallback: ((score: number, ref: number, refr: number, intRef: number, currentLevel: number) => void) | null = null;
 
     // Cache dos dados das fases do JSON
     private levelsData: any[] = [];
@@ -125,7 +125,7 @@ export class Model implements IModel {
 
             // 1. Laser
             if (levelData.emitter) {
-                this.laserModel = new LaserModel(this.scene, levelData.emitter.x, levelData.emitter.z, levelData.emitter.rotationY, 
+                this.laserModel = new LaserModel(this.scene, levelData.emitter.x, levelData.emitter.z, levelData.emitter.rotationY,
                     this.matFactory.matLaserBody, this.matFactory.matLaserEmissive);
             }
 
@@ -136,25 +136,25 @@ export class Model implements IModel {
 
             // 3. Espelhos
             levelData.mirrors?.forEach((m: any, i: number) => {
-                this.mirrors.push(new MirrorModel(this.scene, i, m.x, m.z, m.ry, m.length || 3, 
+                this.mirrors.push(new MirrorModel(this.scene, i, m.x, m.z, m.ry, m.length || 3,
                     this.matFactory.matMirrorBase, this.matFactory.matMirrorSelected));
             });
 
             // 4. Splitters
             levelData.splitters?.forEach((s: any, i: number) => {
-                this.splitters.push(new SplitterModel(this.scene, i, s.x, s.z, s.ry, s.length || 3.0, 
+                this.splitters.push(new SplitterModel(this.scene, i, s.x, s.z, s.ry, s.length || 3.0,
                     this.matFactory.matSplitterBase, this.matFactory.matSplitterSelected));
             });
 
             // 5. Vidros
             levelData.glasses?.forEach((g: any, i: number) => {
-                this.glasses.push(new GlassModel(this.scene, i, g.x, g.z, g.rotationY || 0, g.width, g.depth, 
+                this.glasses.push(new GlassModel(this.scene, i, g.x, g.z, g.rotationY || 0, g.width, g.depth,
                     this.matFactory.matGlassBase, this.matFactory.matGlassSelected, g.refractionIndex || 1.5));
             });
 
             // 6. Blocos
             levelData.blocks?.forEach((b: any, i: number) => {
-                this.blocks.push(new BlockModel(this.scene, i, b.x, b.z, b.rotationY || 0, b.width, b.depth, 
+                this.blocks.push(new BlockModel(this.scene, i, b.x, b.z, b.rotationY || 0, b.width, b.depth,
                     this.matFactory.matBlockBody, this.matFactory.matBlockStripe));
             });
 
@@ -170,7 +170,7 @@ export class Model implements IModel {
         return this.levelScores.reduce((acumulador, valorAtual) => acumulador + valorAtual, 0);
     }
 
-    public setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, intRef: number) => void): void {
+    public setScoreUpdateCallback(callback: (score: number, reflections: number, refractions: number, intRef: number, currentLevel: number) => void): void {
         this.scoreUpdateCallback = callback;
     }
 
@@ -178,7 +178,7 @@ export class Model implements IModel {
         const currentScore = (reflections * 10) + (refractions * 20) + (internalReflections * 50);
 
         if (this.scoreUpdateCallback) {
-            this.scoreUpdateCallback(currentScore, reflections, refractions, internalReflections);
+            this.scoreUpdateCallback(currentScore, reflections, refractions, internalReflections, this.currentLevelIndex + 1);
         }
 
         if (isWin && !this.endGAme) {
