@@ -228,12 +228,12 @@
     "comment": "O Splitter e o espelho central dividem o feixe em dois raios paralelos laterais. A grande parede bloqueia o caminho para o topo. Você precisará usar a Reflexão Interna Total (TIR) nos vidros para atirar horizontalmente nos alvos!"
   },
   {
-    "name": "Nível 11 - A Fenda Estreita",
+    "name": "Nível 11 - A Dança dos Vidros",
     "emitter": { "x": 0, "z": -13, "rotationY": -1.570796 },
     "targets":[
-      { "x": -4, "z": 11, "radius": 0.65 },
-      { "x": 0, "z": 11, "radius": 0.65 },
-      { "x": 4, "z": 11, "radius": 0.65 }
+      { "x": -5, "z": 10, "radius": 0.65 },
+      { "x": 0, "z": 10, "radius": 0.65 },
+      { "x": 5, "z": 10, "radius": 0.65 }
     ],
     "splitters":[
       { "x": 0, "z": -10, "ry": 1.57, "length": 2.5 },
@@ -242,21 +242,21 @@
     "mirrors":[
       { "x": 2.5, "z": -10, "ry": 1.57, "length": 2.5 },
       { "x": -2.5, "z": -7, "ry": 1.57, "length": 2.5 },
-      { "x": -2.5, "z": -2, "ry": 1.57, "length": 2.5 },
-      { "x": 2.5, "z": -2, "ry": 1.57, "length": 2.5 }
+      { "x": -5, "z": 1, "ry": 1.57, "length": 2.5 },
+      { "x": 5, "z": 1, "ry": 1.57, "length": 2.5 }
     ],
     "glasses":[
-      { "x": 0, "z": 0, "rotationY": 1.57, "width": 3, "depth": 2, "refractionIndex": 1.6 },
-      { "x": 0, "z": 5, "rotationY": 1.57, "width": 3, "depth": 2, "refractionIndex": 1.6 }
+      { "x": -2.5, "z": 1, "rotationY": 1.57, "width": 2.5, "depth": 3, "refractionIndex": 1.6 },
+      { "x": 2.5, "z": 1, "rotationY": 1.57, "width": 2.5, "depth": 3, "refractionIndex": 1.6 },
+      { "x": 0, "z": -2, "rotationY": 1.57, "width": 2.5, "depth": 3, "refractionIndex": 1.5 },
+      { "x": 0, "z": 6, "rotationY": 1.57, "width": 2.5, "depth": 3, "refractionIndex": 1.5 }
     ],
     "blocks":[
-      { "x": -3.6, "z": 3, "rotationY": 0, "width": 6, "depth": 1 },
-      { "x": 3.6, "z": 3, "rotationY": 0, "width": 6, "depth": 1 },
-      { "x": 0, "z": 7.5, "rotationY": 0, "width": 1.5, "depth": 1 },
-      { "x": -2, "z": 10, "rotationY": 0, "width": 1.2, "depth": 2 },
-      { "x": 2, "z": 10, "rotationY": 0, "width": 1.2, "depth": 2 }
+      { "x": 0, "z": 2, "rotationY": 0, "width": 1.5, "depth": 1 },
+      { "x": -2.5, "z": 6, "rotationY": 0, "width": 1.5, "depth": 1 },
+      { "x": 2.5, "z": 6, "rotationY": 0, "width": 1.5, "depth": 1 }
     ],
-    "comment": "Três raios cruzando um funil! O raio transmitido (central) precisa usar o Desvio em Degraus (Step Deviation) para desviar do bloqueio. Os raios laterais refletidos precisam de uma mira perfeita para passar pela fresta em X."
+    "comment": "Uma arena aberta! O laser central precisa de uma 'chicane' (dois vidros) para desviar do pilar e voltar pro meio. Os raios laterais devem usar Reflexão Interna Total (TIR) para alcançar os espelhos nas bordas extremas."
   },
   {
     "name": "Nível 12 - A Coroação de Snell",
