@@ -9,26 +9,54 @@ export class OpticsEngine {
     private scene: Scene;
     private gameModel: Model;
 
-    private rayMeshes: Mesh[] =[];
-    private photons: { mesh: Mesh, path: Vector3[], t: number, speed: number }[] =[];
+    private rayMeshes: Mesh[] = [];
+    private photons: { mesh: Mesh, path: Vector3[], t: number, speed: number }[] = [];
 
+    // --- MATERIAIS REUTILIZÁVEIS ---
+    private matLaser!: StandardMaterial;
+    private matSplit!: StandardMaterial;
+    private matArrow!: StandardMaterial;
+    private matPhotonLaser!: StandardMaterial;
+    private matPhotonSplit!: StandardMaterial;
+    private matNormal!: StandardMaterial;
+
+    // --- CONSTANTES ---
     private readonly RAY_Y = 0.325;
     private readonly MAX_BOUNCES = 18;
     private readonly WALL_X = 8.5;
     private readonly WALL_Z = 16.5;
 
-    private readonly BEAM_LASER = new Color3(1.0, 0.06, 0.06);
-    private readonly BEAM_SPLIT = new Color3(1.0, 0.16, 0.16);
-    private readonly ARROW_COL = new Color3(1.0, 0.55, 0.15);
-    private readonly PHOT_COL = new Color3(1.0, 0.65, 0.65);
-    private readonly PHOT_SPLIT = new Color3(1.0, 0.95, 0.55);
+    private readonly COLOR_LASER = new Color3(1.0, 0.06, 0.06);
+    private readonly COLOR_SPLIT = new Color3(1.0, 0.16, 0.16);
+    private readonly COLOR_ARROW = new Color3(1.0, 0.55, 0.15);
+    private readonly COLOR_PHOTON = new Color3(1.0, 0.65, 0.65);
+    private readonly COLOR_PHOTON_SPLIT = new Color3(1.0, 0.95, 0.55);
+    private readonly COLOR_NORMAL = new Color3(0.25, 0.25, 0.9);
 
     constructor(scene: Scene, gameModel: Model) {
         this.scene = scene;
         this.gameModel = gameModel;
+        this.createSharedMaterials();
     }
 
-    // --- Matemática 2D ---
+    private createSharedMaterials() {
+        const createEmissive = (name: string, color: Color3) => {
+            const mat = new StandardMaterial(name, this.scene);
+            mat.emissiveColor = color;
+            mat.disableLighting = true;
+            mat.freeze(); // Otimização: Babylon não checa mais esse material a cada frame
+            return mat;
+        };
+
+        this.matLaser = createEmissive("matLaser", this.COLOR_LASER);
+        this.matSplit = createEmissive("matSplit", this.COLOR_SPLIT);
+        this.matArrow = createEmissive("matArrow", this.COLOR_ARROW);
+        this.matPhotonLaser = createEmissive("matPhotonLaser", this.COLOR_PHOTON);
+        this.matPhotonSplit = createEmissive("matPhotonSplit", this.COLOR_PHOTON_SPLIT);
+        this.matNormal = createEmissive("matNormal", this.COLOR_NORMAL);
+    }
+
+    // --- MATEMÁTICA 2D ---
     private v2(x: number, z: number): Vector2D { return { x, z }; }
     private norm2(v: Vector2D): Vector2D { const l = Math.hypot(v.x, v.z); return this.v2(v.x / l, v.z / l); }
     private dot2(a: Vector2D, b: Vector2D): number { return a.x * b.x + a.z * b.z; }
@@ -38,16 +66,12 @@ export class OpticsEngine {
         return this.norm2(this.v2(d.x - 2 * k * n.x, d.z - 2 * k * n.z));
     }
 
-    // ATUALIZADO: Agora retorna também se foi Reflexão Interna Total (isTIR)
     private refract2(d: Vector2D, n: Vector2D, n1: number, n2: number): { dir: Vector2D, isTIR: boolean } {
         let nx = n.x, nz = n.z;
         let ci = -(d.x * nx + d.z * nz);
         if (ci < 0) { nx = -nx; nz = -nz; ci = -ci; }
         const r = n1 / n2, sin2t = r * r * (1 - ci * ci);
-        
-        // Se sin2t >= 1, ocorreu Reflexão Interna Total (TIR)
         if (sin2t >= 1) return { dir: this.reflect2(d, this.v2(nx, nz)), isTIR: true }; 
-        
         const ct = Math.sqrt(1 - sin2t);
         return { dir: this.norm2(this.v2(r * d.x + (r * ci - ct) * nx, r * d.z + (r * ci - ct) * nz)), isTIR: false };
     }
@@ -65,7 +89,6 @@ export class OpticsEngine {
     private hitOBB(o: Vector2D, d: Vector2D, center: Vector2D, angle: number, halfW: number, halfD: number): { tEn: number, tEx: number } | null {
         const lx = o.x - center.x;
         const lz = o.z - center.z;
-
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
         const localOx = lx * cosA - lz * sinA;
@@ -74,7 +97,6 @@ export class OpticsEngine {
         const localDz = d.x * sinA + d.z * cosA;
 
         let t1x, t2x, t1z, t2z;
-        
         if (Math.abs(localDx) < 1e-12) {
             if (localOx < -halfW - 1e-6 || localOx > halfW + 1e-6) return null;
             t1x = -1e9; t2x = 1e9;
@@ -83,7 +105,6 @@ export class OpticsEngine {
             t2x = (halfW - localOx) / localDx;
             if (t1x > t2x) { const s = t1x; t1x = t2x; t2x = s; }
         }
-
         if (Math.abs(localDz) < 1e-12) {
             if (localOz < -halfD - 1e-6 || localOz > halfD + 1e-6) return null;
             t1z = -1e9; t2z = 1e9;
@@ -92,10 +113,8 @@ export class OpticsEngine {
             t2z = (halfD - localOz) / localDz;
             if (t1z > t2z) { const s = t1z; t1z = t2z; t2z = s; }
         }
-
         const tEn = Math.max(t1x, t1z);
         const tEx = Math.min(t2x, t2z);
-
         if (tEn <= tEx && tEx > 1e-4) return { tEn, tEx };
         return null;
     }
@@ -103,32 +122,26 @@ export class OpticsEngine {
     private obbNormal(pt: Vector2D, center: Vector2D, angle: number, halfW: number, halfD: number): Vector2D {
         const lx = pt.x - center.x;
         const lz = pt.z - center.z;
-
         const cosA = Math.cos(angle);
         const sinA = Math.sin(angle);
-
         const localX = lx * cosA - lz * sinA;
         const localZ = lx * sinA + lz * cosA;
-
         const e = 0.04;
         let localNx = 0, localNz = 0;
-        
         if (Math.abs(localX - (-halfW)) < e) localNx = -1;
         else if (Math.abs(localX - halfW) < e) localNx = 1;
         else if (Math.abs(localZ - (-halfD)) < e) localNz = -1;
         else if (Math.abs(localZ - halfD) < e) localNz = 1;
         else localNz = 1;
-
-        return this.v2(
-            localNx * cosA + localNz * sinA,
-            -localNx * sinA + localNz * cosA
-        );
+        return this.v2(localNx * cosA + localNz * sinA, -localNx * sinA + localNz * cosA);
     }
 
-    // --- Renderização Visual ---
+    // --- RENDERIZAÇÃO ---
     private clearRays() {
-        this.rayMeshes.forEach(m => m.dispose()); this.rayMeshes =[];
-        this.photons.forEach(p => p.mesh.dispose()); this.photons =[];
+        this.rayMeshes.forEach(m => m.dispose());
+        this.rayMeshes = [];
+        this.photons.forEach(p => p.mesh.dispose());
+        this.photons = [];
     }
 
     private orientAlong(mesh: Mesh, from3: Vector3, to3: Vector3) {
@@ -140,74 +153,70 @@ export class OpticsEngine {
         }
     }
 
-    private drawBeam(from3: Vector3, to3: Vector3, color: Color3, thick = 0.072) {
-        const len = to3.subtract(from3).length(); if (len < 0.02) return;
-        const b = MeshBuilder.CreateCylinder("b_" + Math.random(), { height: len, diameter: thick, tessellation: 7 }, this.scene);
+    private drawBeam(from3: Vector3, to3: Vector3, material: StandardMaterial, thick = 0.072) {
+        const len = to3.subtract(from3).length();
+        if (len < 0.02) return;
+        const b = MeshBuilder.CreateCylinder("b", { height: len, diameter: thick, tessellation: 6 }, this.scene);
         b.position = from3.add(to3).scale(0.5); 
         this.orientAlong(b, from3, to3);
-        const mat = new StandardMaterial("bm_" + Math.random(), this.scene);
-        mat.emissiveColor = color; mat.disableLighting = true;
-        b.material = mat; b.isPickable = false; 
+        b.material = material;
+        b.isPickable = false;
+        b.doNotSyncBoundingInfo = true;
         this.rayMeshes.push(b);
     }
 
-    private drawArrowHead(from3: Vector3, to3: Vector3, color: Color3) {
+    private drawArrowHead(from3: Vector3, to3: Vector3) {
         if (to3.subtract(from3).length() < 0.55) return;
         const mid = from3.add(to3).scale(0.5);
-        const cone = MeshBuilder.CreateCylinder("ar_" + Math.random(), { height: 0.38, diameterTop: 0, diameterBottom: 0.30, tessellation: 8 }, this.scene);
+        const cone = MeshBuilder.CreateCylinder("ar", { height: 0.38, diameterTop: 0, diameterBottom: 0.30, tessellation: 6 }, this.scene);
         cone.position = mid.clone(); 
         this.orientAlong(cone, from3, to3);
-        const mat = new StandardMaterial("am_" + Math.random(), this.scene);
-        mat.emissiveColor = color; mat.disableLighting = true;
-        cone.material = mat; cone.isPickable = false; 
+        cone.material = this.matArrow;
+        cone.isPickable = false; 
         this.rayMeshes.push(cone);
     }
 
     private drawNormal(hitXZ: Vector2D, nXZ: Vector2D) {
         const hp = new Vector3(hitXZ.x, this.RAY_Y, hitXZ.z);
         const nv = new Vector3(nXZ.x, 0, nXZ.z).normalize();
-        const col = new Color3(0.25, 0.25, 0.9);
         const dl = 0.30, gap = 0.22, total = 1.9;
-        
         for (const sign of [-1, 1]) {
             let t = gap * 0.45;
             while (t < total) {
-                this.drawBeam(hp.add(nv.scale(sign * t)), hp.add(nv.scale(sign * (t + dl))), col, 0.024);
+                this.drawBeam(hp.add(nv.scale(sign * t)), hp.add(nv.scale(sign * (t + dl))), this.matNormal, 0.024);
                 t += dl + gap;
             }
         }
     }
 
-    private spawnPhoton(path3: Vector3[], color: Color3) {
-        const mesh = MeshBuilder.CreateSphere("ph_" + Math.random(), { diameter: 0.28, segments: 5 }, this.scene);
-        const mat = new StandardMaterial("pm_" + Math.random(), this.scene);
-        mat.emissiveColor = color; mat.disableLighting = true;
-        mesh.material = mat; mesh.isPickable = false;
+    private spawnPhoton(path3: Vector3[], material: StandardMaterial) {
+        const mesh = MeshBuilder.CreateSphere("ph", { diameter: 0.28, segments: 3 }, this.scene);
+        mesh.material = material;
+        mesh.isPickable = false;
+        mesh.doNotSyncBoundingInfo = true;
         this.photons.push({ mesh, path: path3, t: Math.random(), speed: 2.0 });
     }
 
-    // --- Motor Core ---
+    // --- LÓGICA PRINCIPAL ---
     public calculateRays() {
         this.clearRays();
         const hitSet = new Set<TargetModel>();
-
         let reflectionsCount = 0;
         let refractionsCount = 0;
-        let internalReflectionsCount = 0; // NOVO CONTADOR
+        let internalReflectionsCount = 0;
 
         this.gameModel.getTargets().forEach(t => t.setHitState(false));
 
-        const traceBeam = (oIn: Vector2D, dIn: Vector2D, n1: number, depth: number, color: Color3, photColor: Color3) => {
-            if (depth > 6) return; 
+        const traceBeam = (oIn: Vector2D, dIn: Vector2D, n1: number, depth: number, beamMat: StandardMaterial, photMat: StandardMaterial) => {
+            if (depth > 5) return; 
             
             let o = this.v2(oIn.x, oIn.z);
             let d = this.norm2({ x: dIn.x, z: dIn.z });
-            
-            const pathXZ =[this.v2(o.x, o.z)];
-            const normals: (Vector2D | null)[] =[];
-            
+            const pathXZ = [this.v2(o.x, o.z)];
+            const normals: (Vector2D | null)[] = [];
             let inGlass = false;
             let inGlassRef: GlassModel | null = null;
+            let currentN1 = n1; // Agora usamos o n1 passado corretamente
 
             for (let b = 0; b < this.MAX_BOUNCES; b++) {
                 let bestT = 1000, bestKind = 'wall', bestData: any = null;
@@ -217,13 +226,11 @@ export class OpticsEngine {
                     const t = this.hitSeg(o, d, seg.p1, seg.p2);
                     if (t !== null && t < bestT) { bestT = t; bestKind = 'mirror'; bestData = { seg }; }
                 }
-
                 for (const s of this.gameModel.getSplitters()) {
                     const seg = s.getSegment();
                     const t = this.hitSeg(o, d, seg.p1, seg.p2);
                     if (t !== null && t < bestT) { bestT = t; bestKind = 'splitter'; bestData = { seg }; }
                 }
-
                 for (const g of this.gameModel.getGlasses()) {
                     const obb = g.getOBB();
                     const gh = this.hitOBB(o, d, obb.center, obb.angle, obb.halfW, obb.halfD);
@@ -232,18 +239,11 @@ export class OpticsEngine {
                         if (inGlass && inGlassRef === g && gh.tEx > 1e-4 && gh.tEx < bestT) { bestT = gh.tEx; bestKind = 'gOut'; bestData = g; }
                     }
                 }
-
-                // --- NOVO: Teste de Colisão: Blocos Opacos (Obstáculos) ---
                 for (const blk of this.gameModel.getBlocks()) {
                     const obb = blk.getOBB();
                     const hit = this.hitOBB(o, d, obb.center, obb.angle, obb.halfW, obb.halfD);
-                    if (hit && hit.tEn > 1e-4 && hit.tEn < bestT) {
-                        bestT = hit.tEn; 
-                        bestKind = 'block'; 
-                        bestData = blk;
-                    }
+                    if (hit && hit.tEn > 1e-4 && hit.tEn < bestT) { bestT = hit.tEn; bestKind = 'block'; }
                 }
-
                 for (const tg of this.gameModel.getTargets()) {
                     const dtx = tg.x - o.x, dtz = tg.z - o.z;
                     const tp = this.dot2(this.v2(dtx, dtz), d);
@@ -252,7 +252,6 @@ export class OpticsEngine {
                         if (px * px + pz * pz < tg.radius * tg.radius) { bestT = tp; bestKind = 'target'; bestData = tg; }
                     }
                 }
-
                 if (bestKind === 'wall') {
                     let tw = 1000;
                     if (Math.abs(d.x) > 1e-6) tw = Math.min(tw, ((d.x > 0 ? this.WALL_X : -this.WALL_X) - o.x) / d.x);
@@ -263,75 +262,55 @@ export class OpticsEngine {
                 const ep = this.v2(o.x + bestT * d.x, o.z + bestT * d.z);
                 pathXZ.push(ep);
 
-                if (bestKind === 'target') { hitSet.add(bestData); normals.push(null); break; }
-                if (bestKind === 'wall') { normals.push(null); break; }
-                if (bestKind === 'block') { normals.push(null); break; } 
+                if (bestKind === 'target') { hitSet.add(bestData); break; }
+                if (bestKind === 'wall' || bestKind === 'block') break;
 
                 if (bestKind === 'mirror') {
-                    reflectionsCount++; 
+                    reflectionsCount++;
                     let n = bestData.seg.n;
                     if (this.dot2(d, n) > 0) n = this.v2(-n.x, -n.z);
-                    normals.push(n); 
-                    d = this.reflect2(d, n); o = ep;
+                    normals.push(n); d = this.reflect2(d, n); o = ep;
                 } else if (bestKind === 'splitter') {
-                    reflectionsCount++; 
+                    reflectionsCount++;
                     let n = bestData.seg.n;
                     if (this.dot2(d, n) > 0) n = this.v2(-n.x, -n.z);
-                    normals.push(n); 
+                    normals.push(n);
                     const reflD = this.reflect2(d, n);
-                    traceBeam(this.v2(ep.x, ep.z), reflD, n1, depth + 1, this.BEAM_SPLIT, this.PHOT_SPLIT);
-                    o = ep; 
+                    traceBeam(this.v2(ep.x, ep.z), reflD, currentN1, depth + 1, this.matSplit, this.matPhotonSplit);
+                    o = ep;
                 } else if (bestKind === 'gIn') {
-                    refractionsCount++; 
                     const obb = bestData.getOBB();
                     const bn = this.obbNormal(ep, obb.center, obb.angle, obb.halfW, obb.halfD);
-                    normals.push(bn); 
-                    const result = this.refract2(d, bn, 1.0, obb.n);
-                    d = result.dir;
-                    o = ep; inGlass = true; inGlassRef = bestData;
-                } else { // gOut (Tentando sair do vidro)
+                    normals.push(bn);
+                    const res = this.refract2(d, bn, 1.0, obb.n);
+                    d = res.dir; o = ep; inGlass = true; inGlassRef = bestData;
+                } else if (bestKind === 'gOut') {
                     const obb = bestData.getOBB();
                     const bn = this.obbNormal(ep, obb.center, obb.angle, obb.halfW, obb.halfD);
-                    normals.push(bn); 
-                    const result = this.refract2(d, bn, obb.n, 1.0);
-                    d = result.dir;
-                    o = ep; 
-                    
-                    // ATUALIZADO: Checagem de Reflexão Interna Total!
-                    if (result.isTIR) {
-                        internalReflectionsCount++; // Conta +1 de Reflexão Interna
-                        // IMPORTANTE: inGlass continua TRUE porque o raio não conseguiu sair!
-                    } else {
-                        refractionsCount++; // Saiu com sucesso (Refração padrão)
-                        inGlass = false; 
-                        inGlassRef = null;
-                    }
+                    normals.push(bn);
+                    const res = this.refract2(d, bn, obb.n, 1.0);
+                    d = res.dir; o = ep;
+                    if (res.isTIR) { internalReflectionsCount++; } 
+                    else { refractionsCount++; inGlass = false; inGlassRef = null; }
                 }
             }
 
             const path3 = pathXZ.map(p => new Vector3(p.x, this.RAY_Y, p.z));
             for (let i = 0; i < path3.length - 1; i++) {
-                this.drawBeam(path3[i], path3[i + 1], color, 0.072);
-                this.drawArrowHead(path3[i], path3[i + 1], this.ARROW_COL);
+                this.drawBeam(path3[i], path3[i + 1], beamMat);
+                this.drawArrowHead(path3[i], path3[i + 1]);
             }
-
             for (let i = 0; i < normals.length; i++) {
                 if (normals[i]) this.drawNormal(pathXZ[i + 1], normals[i]!);
             }
-
-            if (path3.length >= 2) this.spawnPhoton(path3, photColor);
+            if (path3.length >= 2) this.spawnPhoton(path3, photMat);
         };
 
         const laser = this.gameModel.getLaser();
-        traceBeam(laser.getSourcePosition(), laser.getDirection(), 1.0, 0, this.BEAM_LASER, this.PHOT_COL);
+        traceBeam(laser.getSourcePosition(), laser.getDirection(), 1.0, 0, this.matLaser, this.matPhotonLaser);
 
         hitSet.forEach(target => target.setHitState(true));
-
-        const totalTargets = this.gameModel.getTargets().length;
-        const isWin = (hitSet.size === totalTargets) && (totalTargets > 0);
-
-        // ENVIAR STATUS PARA O MODEL (Incluindo os TIRs!)
-        this.gameModel.updateGameState(isWin, reflectionsCount, refractionsCount, internalReflectionsCount);
+        this.gameModel.updateGameState(hitSet.size === this.gameModel.getTargets().length && this.gameModel.getTargets().length > 0, reflectionsCount, refractionsCount, internalReflectionsCount);
     }
 
     public updatePhotons(dt: number) {
@@ -340,7 +319,6 @@ export class OpticsEngine {
             if (p.t >= 1) p.t -= 1;
             const segs = p.path.length - 1; 
             if (segs < 1) continue;
-            
             const gt = p.t * segs;
             const idx = Math.min(Math.floor(gt), segs - 1);
             p.mesh.position = Vector3.Lerp(p.path[idx], p.path[idx + 1], gt - idx);
