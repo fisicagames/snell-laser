@@ -12,7 +12,6 @@ export class OpticsEngine {
     private rayMeshes: Mesh[] = [];
     private photons: { mesh: Mesh, path: Vector3[], t: number, speed: number }[] = [];
 
-    // --- MATERIAIS REUTILIZÁVEIS ---
     private matLaser!: StandardMaterial;
     private matSplit!: StandardMaterial;
     private matArrow!: StandardMaterial;
@@ -20,7 +19,6 @@ export class OpticsEngine {
     private matPhotonSplit!: StandardMaterial;
     private matNormal!: StandardMaterial;
 
-    // --- CONSTANTES ---
     private readonly RAY_Y = 0.325;
     private readonly MAX_BOUNCES = 18;
     private readonly WALL_X = 8.5;
@@ -44,7 +42,7 @@ export class OpticsEngine {
             const mat = new StandardMaterial(name, this.scene);
             mat.emissiveColor = color;
             mat.disableLighting = true;
-            mat.freeze(); // Otimização: Babylon não checa mais esse material a cada frame
+            mat.freeze(); 
             return mat;
         };
 
@@ -56,7 +54,6 @@ export class OpticsEngine {
         this.matNormal = createEmissive("matNormal", this.COLOR_NORMAL);
     }
 
-    // --- MATEMÁTICA 2D ---
     private v2(x: number, z: number): Vector2D { return { x, z }; }
     private norm2(v: Vector2D): Vector2D { const l = Math.hypot(v.x, v.z); return this.v2(v.x / l, v.z / l); }
     private dot2(a: Vector2D, b: Vector2D): number { return a.x * b.x + a.z * b.z; }
@@ -136,7 +133,6 @@ export class OpticsEngine {
         return this.v2(localNx * cosA + localNz * sinA, -localNx * sinA + localNz * cosA);
     }
 
-    // --- RENDERIZAÇÃO ---
     private clearRays() {
         this.rayMeshes.forEach(m => m.dispose());
         this.rayMeshes = [];
@@ -197,7 +193,6 @@ export class OpticsEngine {
         this.photons.push({ mesh, path: path3, t: Math.random(), speed: 2.0 });
     }
 
-    // --- LÓGICA PRINCIPAL ---
     public calculateRays() {
         this.clearRays();
         const hitSet = new Set<TargetModel>();
@@ -216,7 +211,6 @@ export class OpticsEngine {
             const normals: (Vector2D | null)[] = [];
             let inGlass = false;
             let inGlassRef: GlassModel | null = null;
-            let currentN1 = n1; // Agora usamos o n1 passado corretamente
 
             for (let b = 0; b < this.MAX_BOUNCES; b++) {
                 let bestT = 1000, bestKind = 'wall', bestData: any = null;
@@ -276,9 +270,11 @@ export class OpticsEngine {
                     if (this.dot2(d, n) > 0) n = this.v2(-n.x, -n.z);
                     normals.push(n);
                     const reflD = this.reflect2(d, n);
-                    traceBeam(this.v2(ep.x, ep.z), reflD, currentN1, depth + 1, this.matSplit, this.matPhotonSplit);
+                    traceBeam(this.v2(ep.x, ep.z), reflD, n1, depth + 1, this.matSplit, this.matPhotonSplit);
                     o = ep;
                 } else if (bestKind === 'gIn') {
+                    // CORREÇÃO: Adicionado contador de refração na entrada
+                    refractionsCount++; 
                     const obb = bestData.getOBB();
                     const bn = this.obbNormal(ep, obb.center, obb.angle, obb.halfW, obb.halfD);
                     normals.push(bn);
@@ -290,8 +286,14 @@ export class OpticsEngine {
                     normals.push(bn);
                     const res = this.refract2(d, bn, obb.n, 1.0);
                     d = res.dir; o = ep;
-                    if (res.isTIR) { internalReflectionsCount++; } 
-                    else { refractionsCount++; inGlass = false; inGlassRef = null; }
+                    if (res.isTIR) { 
+                        internalReflectionsCount++; 
+                    } else { 
+                        // CORREÇÃO: Mantido contador de refração na saída
+                        refractionsCount++; 
+                        inGlass = false; 
+                        inGlassRef = null; 
+                    }
                 }
             }
 
