@@ -9,6 +9,7 @@ import { SplitterModel } from "./SplitterModel";
 import { GlassModel } from "./GlassModel";
 import { BlockModel } from "./BlockModel";
 import { OpticsEngine } from "./OpticsEngine";
+import { MaterialFactory } from "./MaterialFactory";
 
 export class Model implements IModel {
     private scene: Scene;
@@ -19,6 +20,8 @@ export class Model implements IModel {
     private endGameCallback: ((isVisible: boolean) => void) | null = null;
     public endGAme: boolean = false;
     public updateModels: boolean = false;
+
+    private matFactory!: MaterialFactory;
 
     private groundModel!: GroundModel;
     private mirrors: MirrorModel[] = [];
@@ -55,6 +58,8 @@ export class Model implements IModel {
 
         this.groundModel = new GroundModel(this.scene, 16, 32);
         this.opticsEngine = new OpticsEngine(this.scene, this);
+
+        this.matFactory = new MaterialFactory(this.scene);
 
         // Ao invés de instanciar peças soltas, mandamos carregar a Fase 1
         this.loadLevel(0);
@@ -100,7 +105,6 @@ export class Model implements IModel {
     // Assíncrono: Baixa o JSON e constrói a fase lendo ele
     public async loadLevel(levelIndex: number): Promise<void> {
         this.currentLevelIndex = levelIndex;
-        console.log(`Carregando a Fase ${levelIndex + 1}...`);
 
         try {
             // Só baixa o arquivo na primeira vez
@@ -119,34 +123,39 @@ export class Model implements IModel {
 
             this.clearCurrentLevel();
 
-            // 1. Cria o Laser
+            // 1. Laser
             if (levelData.emitter) {
-                this.laserModel = new LaserModel(this.scene, levelData.emitter.x, levelData.emitter.z, levelData.emitter.rotationY);
+                this.laserModel = new LaserModel(this.scene, levelData.emitter.x, levelData.emitter.z, levelData.emitter.rotationY, 
+                    this.matFactory.matLaserBody, this.matFactory.matLaserEmissive);
             }
 
-            // 2. Cria os Alvos
+            // 2. Alvos (TargetModel continua criando os seus próprios, pois são únicos/animados)
             levelData.targets?.forEach((t: any, i: number) => {
                 this.targets.push(new TargetModel(this.scene, i, t.x, t.z, t.radius || 0.65));
             });
 
-            // 3. Cria os Espelhos
+            // 3. Espelhos
             levelData.mirrors?.forEach((m: any, i: number) => {
-                this.mirrors.push(new MirrorModel(this.scene, i, m.x, m.z, m.ry, m.length || 3.0));
+                this.mirrors.push(new MirrorModel(this.scene, i, m.x, m.z, m.ry, m.length || 3, 
+                    this.matFactory.matMirrorBase, this.matFactory.matMirrorSelected));
             });
 
-            // 4. Cria os Splitters
+            // 4. Splitters
             levelData.splitters?.forEach((s: any, i: number) => {
-                this.splitters.push(new SplitterModel(this.scene, i, s.x, s.z, s.ry, s.length || 3.0));
+                this.splitters.push(new SplitterModel(this.scene, i, s.x, s.z, s.ry, s.length || 3.0, 
+                    this.matFactory.matSplitterBase, this.matFactory.matSplitterSelected));
             });
 
-            // 5. Cria os Vidros
+            // 5. Vidros
             levelData.glasses?.forEach((g: any, i: number) => {
-                this.glasses.push(new GlassModel(this.scene, i, g.x, g.z, g.rotationY || 0, g.width, g.depth, g.refractionIndex || 1.5));
+                this.glasses.push(new GlassModel(this.scene, i, g.x, g.z, g.rotationY || 0, g.width, g.depth, 
+                    this.matFactory.matGlassBase, this.matFactory.matGlassSelected, g.refractionIndex || 1.5));
             });
 
-            // 6. NOVO: Cria os Obstáculos Opacos (Blocos)
+            // 6. Blocos
             levelData.blocks?.forEach((b: any, i: number) => {
-                this.blocks.push(new BlockModel(this.scene, i, b.x, b.z, b.rotationY || 0, b.width, b.depth));
+                this.blocks.push(new BlockModel(this.scene, i, b.x, b.z, b.rotationY || 0, b.width, b.depth, 
+                    this.matFactory.matBlockBody, this.matFactory.matBlockStripe));
             });
 
             // Força a Óptica a desenhar os raios da nova fase

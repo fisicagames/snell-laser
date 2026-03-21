@@ -159,7 +159,11 @@ export class TargetModel {
             this.scene.onBeforeRenderObservable.remove(this.animationObserver);
             this.animationObserver = null;
         }
-
+        // Limpa os materiais criados exclusivamente para este alvo
+        if (this.orMat) this.orMat.dispose();
+        if (this.mrMat) this.mrMat.dispose();
+        if (this.inMat) this.inMat.dispose();
+        
         // 3. Destrói as malhas 3D
         if (this.root) {
             this.root.dispose();

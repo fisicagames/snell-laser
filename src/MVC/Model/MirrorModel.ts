@@ -9,8 +9,14 @@ export class MirrorModel {
     public mesh: Mesh; // A face do espelho
     public length: number;
 
-    constructor(scene: Scene, id: number, x: number, z: number, rotationY: number, length: number = 3.0) {
+    private matBase: StandardMaterial;
+    private matSelected: StandardMaterial;
+
+    constructor(scene: Scene, id: number, x: number, z: number, rotationY: number, length: number, matBase: StandardMaterial, matSelected: StandardMaterial) {
         this.scene = scene;
+        this.matBase = matBase;
+        this.matSelected = matSelected;
+
         this.length = length;
         
         // Root mantém o texto e o espelho na posição correta da cena
@@ -31,12 +37,7 @@ export class MirrorModel {
         mesh.position.set(0, 0.26, 0); // Posição Y relativa ao root
         mesh.parent = this.rotator; // Atrelado ao nó rotativo
         
-        const mat = new StandardMaterial("mm" + id, this.scene);
-        mat.diffuseColor = new Color3(0.78, 0.92, 1);
-        mat.emissiveColor = new Color3(0.15, 0.25, 0.45); // Cor base
-        mat.specularColor = Color3.White();
-        mat.specularPower = 512;
-        mesh.material = mat;
+        mesh.material = this.matBase
 
         // --- RÓTULO FLUTUANTE ---
         const lp = MeshBuilder.CreatePlane("mLP" + id, { width: 0.8, height: 0.34 }, this.scene);
@@ -65,11 +66,7 @@ export class MirrorModel {
     }
 
     public setHighlight(isHighlighted: boolean): void {
-        const mat = this.mesh.material as StandardMaterial;
-        if (mat) {
-            // Emite a cor laranja original quando selecionado
-            mat.emissiveColor = isHighlighted ? new Color3(1, 0.75, 0.05) : new Color3(0.15, 0.25, 0.45);
-        }
+        this.mesh.material = isHighlighted ? this.matSelected : this.matBase;
     }
 
         public getSegment() {

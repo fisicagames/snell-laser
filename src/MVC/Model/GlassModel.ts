@@ -1,4 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, TransformNode, Mesh } from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, TransformNode, Mesh } from "@babylonjs/core";
 import { AdvancedDynamicTexture, TextBlock } from "@babylonjs/gui";
 
 export class GlassModel {
@@ -11,11 +11,28 @@ export class GlassModel {
     public depth: number;
     public refractionIndex: number;
 
-    constructor(scene: Scene, id: number, x: number, z: number, rotationY: number, width: number, depth: number, refractionIndex: number = 1.5) {
+    // Referências dos materiais compartilhados
+    private matBase: StandardMaterial;
+    private matSelected: StandardMaterial;
+
+    constructor(
+        scene: Scene, 
+        id: number, 
+        x: number, 
+        z: number, 
+        rotationY: number, 
+        width: number, 
+        depth: number, 
+        matBase: StandardMaterial, 
+        matSelected: StandardMaterial, 
+        refractionIndex: number = 1.5
+    ) {
         this.scene = scene;
         this.width = width;
         this.depth = depth;
         this.refractionIndex = refractionIndex;
+        this.matBase = matBase;
+        this.matSelected = matSelected;
         
         this.root = new TransformNode("glassRoot_" + id, this.scene);
         this.root.position.set(x, 0, z);
@@ -30,17 +47,13 @@ export class GlassModel {
     private createGlass(id: number): Mesh {
         const mesh = MeshBuilder.CreateBox("gls" + id, { width: this.width, height: 0.44, depth: this.depth }, this.scene);
         mesh.position.set(0, 0.22, 0); 
-        mesh.parent = this.rotator; // Atrelado ao nó rotativo
+        mesh.parent = this.rotator; 
         mesh.isPickable = false;
 
-        const mat = new StandardMaterial("glsm" + id, this.scene);
-        mat.diffuseColor = new Color3(0.35, 0.72, 1);
-        mat.emissiveColor = new Color3(0.04, 0.18, 0.42);
-        mat.alpha = 0.48; 
-        mat.backFaceCulling = false;
-        mesh.material = mat;
+        // Atribui o material da fábrica
+        mesh.material = this.matBase;
 
-        // Rótulo Flutuante (Fica no Root, não gira)
+        // Rótulo Flutuante (Fica no Root, não gira com o bloco)
         const lp = MeshBuilder.CreatePlane("gp" + id, { width: this.width + 0.3, height: 0.5 }, this.scene);
         lp.position.set(0, 0.82, 0);
         lp.billboardMode = Mesh.BILLBOARDMODE_ALL;
@@ -57,20 +70,14 @@ export class GlassModel {
         return mesh;
     }
 
-    // Acesso e modificação da rotação para o Controller
     public get rotationY(): number { return this.rotator.rotation.y; }
     public set rotationY(value: number) { this.rotator.rotation.y = value; }
 
-    // Cor ao ser selecionado pelo Controller
+    // Otimizado: Troca o material inteiro em vez de mudar a cor
     public setHighlight(isHighlighted: boolean): void {
-        const mat = this.mesh.material as StandardMaterial;
-        if (mat) {
-            // Fica com azul neon/brilhante quando selecionado
-            mat.emissiveColor = isHighlighted ? new Color3(0.08, 0.4, 0.8) : new Color3(0.04, 0.18, 0.42);
-        }
+        this.mesh.material = isHighlighted ? this.matSelected : this.matBase;
     }
 
-    // Retorna os dados da Caixa Orientada (Oriented Bounding Box) para a Física
     public getOBB() {
         return {
             center: { x: this.root.position.x, z: this.root.position.z },
