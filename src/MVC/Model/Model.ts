@@ -184,14 +184,18 @@ export class Model implements IModel {
         if (isWin && !this.endGAme) {
             this.endGAme = true;
 
+            // 1. Primeiro atualizamos o score da fase atual no array
             this.levelScores[this.currentLevelIndex] = Math.max(this.levelScores[this.currentLevelIndex], currentScore);
 
-            localStorage.setItem('snell_laser_scores', JSON.stringify(this.levelScores));
-            localStorage.setItem('snell_laser_unlocked', this.unlockedLevels.toString());
-
+            // 2. Calculamos se devemos desbloquear a próxima fase
+            // Se o nível atual + 1 for maior ou igual ao que já temos liberado, liberamos o próximo
             if (this.currentLevelIndex + 1 >= this.unlockedLevels && this.unlockedLevels < 12) {
                 this.unlockedLevels = this.currentLevelIndex + 2;
             }
+
+            // 3. AGORA salvamos tudo no localStorage com os valores já atualizados!
+            localStorage.setItem('snell_laser_scores', JSON.stringify(this.levelScores));
+            localStorage.setItem('snell_laser_unlocked', this.unlockedLevels.toString());
 
             if (this.endGameCallback) {
                 this.endGameCallback(true);
