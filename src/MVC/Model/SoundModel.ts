@@ -3,20 +3,20 @@ import { ISoundInterface } from "./ISoundInterface";
 
 export class SoundModel implements ISoundInterface {
     private _sound: Sound;
-    public static isMusicEnabled: boolean = true;
+    public static isMusicEnabled: boolean = false;
     private _autoPlay: boolean = false;
 
-    public toggleAllMusicsEnabled(){
+    public toggleAllMusicsEnabled() {
         SoundModel.isMusicEnabled = !SoundModel.isMusicEnabled;
         return SoundModel.isMusicEnabled;
     }
 
     constructor(scene: Scene, name: string, path: string, autoplay: boolean) {
         this._autoPlay = autoplay;
-        
+
         this._sound = new Sound(name, path, scene, () => {
-            // Em vez de dar play direto, verificamos se o áudio já está desbloqueado pelo navegador
-            if (this._autoPlay) {
+            // Só tenta tocar se o autoplay for true E se o usuário já tiver ativado no botão
+            if (this._autoPlay && SoundModel.isMusicEnabled) {
                 this.handleInitialPlay();
             }
         }, {
@@ -29,6 +29,8 @@ export class SoundModel implements ISoundInterface {
     }
 
     private handleInitialPlay() {
+        // Checagem extra de segurança para evitar duplicidade
+        if (this._sound.isPlaying) return;
         // Se o navegador já permitiu áudio, toca. 
         // Se não, espera o evento oficial de "Audio Unlocked" (primeiro clique do player)
         if (Engine.audioEngine && Engine.audioEngine.unlocked) {
@@ -89,7 +91,7 @@ export class SoundModel implements ISoundInterface {
     public setVolume(volume: number): void {
         this._sound.setVolume(volume);
     }
-    
+
     public getVolume(): number {
         return this._sound.getVolume();
     }
