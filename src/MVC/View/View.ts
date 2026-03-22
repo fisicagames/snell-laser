@@ -368,13 +368,13 @@ export class View implements IView {
             this.textblockMenuLevel.text = isPT ? "Estudante Aplicado 📘" : "Dedicated Student 📘";
         } else if (score < 800) {
             this.textblockMenuLevel.text = isPT ? "Universitário Iniciante ✏️" : "Novice University Student ✏️";
-        } else if (score < 900) {
+        } else if (score < 1000) {
             this.textblockMenuLevel.text = isPT ? "Universitário Dedicado 📚" : "Advanced University Student 📚";
-        } else if (score < 1200) {
-            this.textblockMenuLevel.text = isPT ? "Professor de Física 🧑‍🏫" : "Physics Professor 🧑‍🏫";
         } else if (score < 1500) {
+            this.textblockMenuLevel.text = isPT ? "Professor de Física 🧑‍🏫" : "Physics Professor 🧑‍🏫";
+        } else if (score < 2000) {
             this.textblockMenuLevel.text = isPT ? "Professor de Óptica 🎓" : "Optics Professor 🎓";
-        } else if (score < 1800) {
+        } else if (score < 2500) {
             this.textblockMenuLevel.text = isPT ? "Gênio da Física 🧠" : "Physics Genius 🧠";
         } else {
             this.textblockMenuLevel.text = isPT ? "Willebrord Snellius ✨" : "Willebrord Snellius ✨";
