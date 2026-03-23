@@ -1,7 +1,6 @@
-
 # Snell Laser 🚀
 
-[![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](https://github.com/rafaelj/snell-laser)
+[![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC%20BY--ND%204.0-green.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
 [![Babylon.js](https://img.shields.io/badge/Babylon.js-8.52.0-purple.svg)](https://www.babylonjs.com/)
 [![Vite](https://img.shields.io/badge/Vite-7.3.1-yellow.svg)](https://vitejs.dev/)
@@ -9,7 +8,6 @@
 A hyper-casual puzzle game focused on Geometric Optics concepts, built on a custom MVC framework using Babylon.js.
 
 ### [🎮 Play Now!](https://fisicagames.com.br/index.php/2026/03/22/snell-laser/)
-
 
 ---
 
@@ -58,8 +56,8 @@ The project serves as an educational tool, visually demonstrating the **Snell-De
 
 📱 **On Mobile / Touch:**
 
-* **[ ▲ ]** / **[ ▼ ]** : Tap the vertical virtual buttons to switch the active piece.
-* **[ ⟲ ]** / **[ ⟳ ]** : Hold the rotation buttons to calibrate the light beam with precision.
+* **[ ▲ ]** / **[ ▼ ]** : Tap the vertical virtual buttons on the left to switch the active piece.
+* **[ ⟲ ]** / **[ ⟳ ]** : Hold the rotation buttons on the right to calibrate the light beam with precision.
 
 ---
 
@@ -117,9 +115,9 @@ For GPU optimization, the project implements the **Factory Pattern (`MaterialFac
 
 ## 📜 License
 
-This project is protected by copyright and is under a proprietary license. It is not available for distribution, modification, or commercial use without explicit permission from the author.
+This project is licensed under a **Creative Commons Attribution-NoDerivatives 4.0 International License (CC BY-ND 4.0)**. You are free to share, copy, and redistribute the game in any medium or format for any purpose, even commercially, as long as appropriate credit is given to the author and the link to [www.fisicagames.com.br](https://www.fisicagames.com.br) is maintained. You may not distribute modified versions of the source code.
 
-Copyright (c) 2026 Rafael João Ribeiro.
+**Copyright © 2026 Rafael João Ribeiro.**
 
 ---
 
