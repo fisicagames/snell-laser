@@ -16,7 +16,6 @@ import { MaterialFactory } from "./MaterialFactory";
 export class Model implements IModel {
     private scene: Scene;
     private backgroundMusic?: SoundModel;
-    private explosionSound?: SoundModel;
     private allSounds: SoundModel[] = [];
     private physicsPlugin: HavokPlugin | null;
     private endGameCallback: ((isVisible: boolean) => void) | null = null;
@@ -233,19 +232,6 @@ export class Model implements IModel {
         );
         this.backgroundMusic.setVolume(1.0);
         this.allSounds.push(this.backgroundMusic);
-
-
-        //https://pixabay.com/sound-effects/nuclear-explosion-63470/
-        //Artistunfa (Freesound)
-        this.explosionSound = new SoundModel(
-            this.scene,
-            "explosionSound",
-            "./assets/sounds/timelapse-164084-compress.mp3",
-            false
-        );
-        this.explosionSound.setVolume(1.2);
-        this.explosionSound?.setLoop(false);
-        this.allSounds.push(this.explosionSound);
     }
 
     public triggerRecalculation(): void {
