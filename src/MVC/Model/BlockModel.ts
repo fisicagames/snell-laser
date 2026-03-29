@@ -1,4 +1,8 @@
-import { Scene, MeshBuilder, StandardMaterial, TransformNode, Mesh } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { Mesh } from "@babylonjs/core/Meshes/mesh";
 
 export class BlockModel {
     private scene: Scene;

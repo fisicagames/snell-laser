@@ -1,4 +1,5 @@
-import { Engine, GPUParticleSystem } from "@babylonjs/core";
+import { Engine } from "@babylonjs/core/Engines/engine";
+import { GPUParticleSystem } from "@babylonjs/core/Particles/gpuParticleSystem";
 
 export class EngineInitializer {
     public static createEngine(canvas: HTMLCanvasElement): Engine {

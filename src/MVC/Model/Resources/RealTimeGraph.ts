@@ -1,4 +1,7 @@
-import { LinesMesh, MeshBuilder, Scene, Vector3 } from "@babylonjs/core";
+import { LinesMesh } from "@babylonjs/core/Meshes/linesMesh";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { Scene } from "@babylonjs/core/scene";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 
 export class RealTimeGraph {
     private scene: Scene;

@@ -1,4 +1,8 @@
-import { Scene, Vector3, FollowCamera, UniversalCamera, AbstractMesh } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { FollowCamera } from "@babylonjs/core/Cameras/followCamera";
+import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 
 export class CameraInitializer {
     public static createFollowCamera(scene: Scene, targetMesh: AbstractMesh | null = null): FollowCamera {

@@ -1,4 +1,6 @@
-import { Scene, StandardMaterial, Color3 } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
 
 export class MaterialFactory {
     // Laser

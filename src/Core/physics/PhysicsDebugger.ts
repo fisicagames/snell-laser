@@ -1,4 +1,5 @@
-import { PhysicsViewer, Scene } from "@babylonjs/core";
+import { PhysicsViewer } from "@babylonjs/core/Debug/physicsViewer";
+import { Scene } from "@babylonjs/core/scene";
 
 export class PhysicsDebugger {
     public static enablePhysicsViewer(scene: Scene, enable: boolean): void {

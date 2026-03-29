@@ -1,4 +1,6 @@
-import { AdvancedDynamicTexture, TextBlock, Button } from "@babylonjs/gui";
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
+import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
+import { Button } from "@babylonjs/gui/2D/controls/button";
 
 export class LanguageSwitcher {
     public languageOption: number;

@@ -1,4 +1,7 @@
-import { HavokPlugin, Scene, Vector3 } from "@babylonjs/core";
+import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
+import { Scene } from "@babylonjs/core/scene";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+
 import HavokPhysics from "@babylonjs/havok";
 
 export class HavokPhysicsEngine   {

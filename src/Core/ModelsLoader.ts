@@ -1,5 +1,7 @@
-import { Scene, SceneLoader, Vector3, AbstractMesh } from "@babylonjs/core";
-
+import { Scene } from "@babylonjs/core/scene";
+import { SceneLoader } from "@babylonjs/core/Loading/sceneLoader";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { AbstractMesh } from "@babylonjs/core/Meshes/abstractMesh";
 export class ModelsLoader {
     private static detachFromRoot(scene: Scene): void {
         const root = scene.getMeshByName("__root__");

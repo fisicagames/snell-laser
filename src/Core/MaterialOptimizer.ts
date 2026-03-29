@@ -1,4 +1,5 @@
-import { Scene, PBRMaterial } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { PBRMaterial } from "@babylonjs/core/Materials/PBR/pbrMaterial";
 
 //How to use:
 //const materialNames = ["MaterialX.00X", "MaterialY.00Y"]; 

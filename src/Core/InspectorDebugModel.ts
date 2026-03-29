@@ -1,4 +1,5 @@
-import { Scene, VirtualJoystick } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { VirtualJoystick } from "@babylonjs/core/Misc/virtualJoystick";
 import "@babylonjs/inspector";
 
 export class InspectorDebugModel {

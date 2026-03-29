@@ -1,9 +1,12 @@
 // src\MVC.ts
-import { HavokPlugin, Scene } from "@babylonjs/core";
+import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
+import { Scene } from "@babylonjs/core/scene";
+
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
+
 import { Controller } from "./Controller/Controller";
 import { Model } from "./Model/Model";
 import { View } from "./View/View";
-import { AdvancedDynamicTexture } from "@babylonjs/gui";
 
 export class MVC {
     private scene: Scene;

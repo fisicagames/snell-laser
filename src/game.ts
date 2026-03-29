@@ -1,4 +1,6 @@
-import { Engine } from "@babylonjs/core";
+import "@babylonjs/core/Loading/loadingScreen";
+
+import { Engine } from "@babylonjs/core/Engines/engine";
 import { CanvasInitializer } from "./Core/CanvasInitializer";
 import { EngineInitializer } from "./Core/EngineInitializer";
 import { SceneInitializer } from "./Core/SceneInitializer";

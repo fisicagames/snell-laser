@@ -1,13 +1,24 @@
+import { visualizer } from "rollup-plugin-visualizer";
+
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
+  plugins: [
+    visualizer({
+      open: true, // Abre no navegador automaticamente após o build
+      filename: "bundle-analise.html",
+      gzipSize: true,
+      brotliSize: true
+    })
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
   build: {
+    chunkSizeWarningLimit: 4000, // Aumenta o limite para 4MB, assim o aviso some
     target: 'esnext',
     minify: 'esbuild',
     // DESATIVA o pré-carregamento de módulos. 

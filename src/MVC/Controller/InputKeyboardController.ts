@@ -1,4 +1,5 @@
-import { Scene, KeyboardEventTypes } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { KeyboardEventTypes } from "@babylonjs/core/Events/keyboardEvents";
 
 export class InputKeyboardController {
     private scene: Scene;

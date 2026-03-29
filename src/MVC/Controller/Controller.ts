@@ -1,4 +1,8 @@
-import { Scene, KeyboardEventTypes, TransformNode, UniversalCamera } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { KeyboardEventTypes } from "@babylonjs/core/Events/keyboardEvents";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
+
 import { IModel } from "../Model/IModel";
 import { IView } from "../View/IView";
 import { InputKeyboardController } from "./InputKeyboardController";

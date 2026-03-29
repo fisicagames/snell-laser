@@ -1,6 +1,13 @@
 // src\View\View.ts
-import { Scene } from "@babylonjs/core";
-import { AdvancedDynamicTexture, Button, Rectangle, TextBlock, Grid, Control } from "@babylonjs/gui";
+import { Scene } from "@babylonjs/core/scene";
+
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
+import { Button } from "@babylonjs/gui/2D/controls/button";
+import { Rectangle } from "@babylonjs/gui/2D/controls/rectangle";
+import { TextBlock } from "@babylonjs/gui/2D/controls/textBlock";
+import { Grid } from "@babylonjs/gui/2D/controls/grid";
+import { Control } from "@babylonjs/gui/2D/controls/control";
+
 import { IView } from "./IView";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { EndGamePhrases } from "./EndGamePhrases";

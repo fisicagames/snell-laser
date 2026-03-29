@@ -1,4 +1,7 @@
-import { Vector3, UniversalCamera, TransformNode } from "@babylonjs/core";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { UniversalCamera } from "@babylonjs/core/Cameras/universalCamera";
+import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
+
 import { TargetModel } from "../Model/TargetModel";
 
 export class CameraController {

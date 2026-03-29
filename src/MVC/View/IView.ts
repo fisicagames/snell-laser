@@ -1,5 +1,5 @@
-import { Vector3, Mesh } from "@babylonjs/core";
-
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { Mesh } from "@babylonjs/core/Meshes/mesh";
 export interface IView {
     onButtonMenuStartA(callback: () => void): void;
     onButtonMenuStartB(callback: () => void): void;

@@ -1,6 +1,6 @@
 // src/managers/JoystickManager.ts
 
-import { VirtualJoystick } from "@babylonjs/core";
+import { VirtualJoystick } from "@babylonjs/core/Misc/virtualJoystick";
 
 export class JoystickModel {
     private _joysticks: VirtualJoystick[] = [];

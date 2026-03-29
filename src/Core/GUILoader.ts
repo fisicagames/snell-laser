@@ -1,5 +1,5 @@
-import { Scene } from "@babylonjs/core";
-import { AdvancedDynamicTexture } from "@babylonjs/gui";
+import { Scene } from "@babylonjs/core/scene";
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
 
 export class GUILoader {
     public static async loadGUI(scene: Scene, url: string): Promise<AdvancedDynamicTexture> {

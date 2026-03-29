@@ -1,6 +1,14 @@
 //TODO: Implement a conditionally import for HavokPlugin.
 import "@babylonjs/loaders/glTF";
-import { Engine, Scene, Vector3, HemisphericLight, ScenePerformancePriority, Color4, HavokPlugin, GlowLayer } from "@babylonjs/core";
+import { Engine } from "@babylonjs/core/Engines/engine";
+import { Scene } from "@babylonjs/core/scene";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
+import { HemisphericLight } from "@babylonjs/core/Lights/hemisphericLight";
+import { ScenePerformancePriority } from "@babylonjs/core/scene";
+import { Color4 } from "@babylonjs/core/Maths/math.color";
+import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
+import { GlowLayer } from "@babylonjs/core/Layers/glowLayer";
+
 import { CameraInitializer } from "./CameraInitializer";
 import { optimizeMaterials } from "./MaterialOptimizer";
 import { GUILoader } from "./GUILoader";

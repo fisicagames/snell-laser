@@ -1,4 +1,6 @@
-import { Scene, HavokPlugin } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { HavokPlugin } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
+
 import { IModel } from "./IModel";
 import { SoundModel } from "./SoundModel";
 import { GroundModel } from "./GroundModel";

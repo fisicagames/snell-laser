@@ -1,5 +1,14 @@
-import { AdvancedDynamicTexture, Ellipse, Control } from "@babylonjs/gui";
-import { Vector2, Scene, PointerEventTypes, Nullable, Observer, PointerInfo } from "@babylonjs/core";
+import { AdvancedDynamicTexture } from "@babylonjs/gui/2D/advancedDynamicTexture";
+import { Ellipse } from "@babylonjs/gui/2D/controls/ellipse";
+import { Control } from "@babylonjs/gui/2D/controls/control";
+
+import { Vector2 } from "@babylonjs/core/Maths/math.vector";
+import { Scene } from "@babylonjs/core/scene";
+import { PointerEventTypes } from "@babylonjs/core/Events/pointerEvents";
+import { Nullable } from "@babylonjs/core/types";
+import { Observer } from "@babylonjs/core/Misc/observable";
+import { PointerInfo } from "@babylonjs/core/Events/pointerEvents";
+
 import { ICustomJoystick } from "./ICustomJoystick";
 
 export class CustomJoystick implements ICustomJoystick {

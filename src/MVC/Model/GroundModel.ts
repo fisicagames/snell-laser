@@ -1,4 +1,8 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, Vector3 } from "@babylonjs/core";
+import { Scene } from "@babylonjs/core/scene";
+import { MeshBuilder } from "@babylonjs/core/Meshes/meshBuilder";
+import { StandardMaterial } from "@babylonjs/core/Materials/standardMaterial";
+import { Color3 } from "@babylonjs/core/Maths/math.color";
+import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 
 export class GroundModel {
     private scene: Scene;
