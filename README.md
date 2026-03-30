@@ -127,3 +127,34 @@ Developed by:
 **Prof. Dr. Rafael João Ribeiro**
 Federal Institute of Paraná (IFPR)
 [www.fisicagames.com.br](https://www.fisicagames.com.br)
+
+
+## 📊 Commit Types — Verb Cheat Sheet
+
+This table summarizes the commit types used in the project, along with common verbs to start commit messages following best practices (imperative mood, present tense).
+
+| Type       | Purpose                                                                 | Common verbs (imperative)                |
+|------------|-------------------------------------------------------------------------|------------------------------------------|
+| **feat**   | Introduce a new feature or functionality                                | add, implement, introduce, create        |
+| **fix**    | Fix a bug or incorrect behavior                                         | fix, correct, resolve, prevent           |
+| **perf**   | Improve performance (CPU, GPU, memory, bundle size)                     | optimize, improve, reduce, enhance       |
+| **refactor** | Restructure code without changing external behavior                  | refactor, reorganize, simplify, restructure |
+| **style**  | Adjust visual aspects (UI, colors, layout, fonts)                       | adjust, update, tweak, refine            |
+| **docs**   | Documentation updates (README, comments, license)                       | add, update, improve, clarify            |
+| **build**  | Build system, bundler (Vite), dependencies, configuration               | configure, update, adjust, setup         |
+| **chore**  | Maintenance tasks, cleanup, assets, non-functional changes              | clean, remove, update, organize          |
+| **balance**| Gameplay tuning (score system, difficulty, progression)                 | adjust, rebalance, tune, update          |
+
+---
+
+### ✅ Examples
+
+```text
+feat(levels): add 12 game levels
+fix(audio): prevent double sound on mobile
+perf(optics): optimize ray rendering
+refactor(controller): simplify movement logic
+style(gui): adjust font styles
+build(vite): configure single bundle output
+chore(release): add v1.1.0 distribution archive
+balance(score): adjust rank thresholds
