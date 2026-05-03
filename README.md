@@ -7,7 +7,7 @@
 
 A hyper-casual puzzle game focused on Geometric Optics concepts, built on a custom MVC framework using Babylon.js.
 
-### [🎮 Play Now!](https://fisicagames.com.br/index.php/2026/03/22/snell-laser/)
+### [🎮 Play Now!](https://fisicagames.com.br)
 
 ---
 
