@@ -5,9 +5,9 @@
 [![Babylon.js](https://img.shields.io/badge/Babylon.js-8.52.0-purple.svg)](https://www.babylonjs.com/)
 [![Vite](https://img.shields.io/badge/Vite-7.3.1-yellow.svg)](https://vitejs.dev/)
 
-A hyper-casual puzzle game focused on Geometric Optics concepts, built on a custom MVC framework using Babylon.js.
+A hyper-casual puzzle game focused on Geometric Optics concepts, built on a custom MVC framework using Babylon.js. Developed in 2026 as the eighth simulation of the SHIFT series, with AI-assisted code generation for the optical engine.
 
-### [🎮 Play Now!](https://fisicagames.com.br)
+### [🎮 Play Now!](https://fisicagames.com.br/index.php/2026/03/22/snell-laser/)
 
 ---
 
@@ -76,10 +76,7 @@ Developed in a **Linux EndeavourOS (Kernel 6.19.8)** environment with **KDE Plas
 
 ## 🚀 Installation and Setup
 
-**Prerequisites:**
-
-* Node.js (v20 or higher)
-* NPM (v10 or higher)
+**Prerequisites:** Node.js (v20+), npm (v10+).
 
 **Steps:**
 
@@ -101,15 +98,32 @@ Developed in a **Linux EndeavourOS (Kernel 6.19.8)** environment with **KDE Plas
 
 ## 🏗 Architecture and Technical Highlights
 
-The technological cornerstone of this project is its **custom MVC Framework written in TypeScript**, refined by the author over years of research into interactive simulations. This architecture allows the simulation to run natively in mobile browsers without requiring full-screen APIs or third-party app installations.
+The technological cornerstone of this project is its **custom MVC Framework written in TypeScript**, refined by the author across the SHIFT series and consolidating the **callback-based Mediator pattern** introduced in earlier simulations. This architecture allows the simulation to run natively in mobile browsers without requiring full-screen APIs or third-party app installations.
 
 Data flow is strictly organized using the **Model-View-Controller (MVC)** pattern via callbacks:
 
-* **Model:** A render-agnostic layer housing the `OpticsEngine`, a custom-built Raycasting engine. It evaluates intersections against **Oriented Bounding Boxes (OBB)** in real-time using pure linear algebra, reproducing optical laws at a solid 60 FPS.
+* **Model:** A render-agnostic layer housing the `OpticsEngine`, a custom-built 2D Raycasting engine. It evaluates intersections against **Oriented Bounding Boxes (OBB)** in real-time using pure linear algebra, reproducing optical laws at a solid 60 FPS.
 * **View:** Constructs the interface via Babylon GUI and manages a reactive translation chain (`LanguageSwitcher`), updating the UI based on state changes.
 * **Controller:** Processes hardware listeners and coordinates request throttling for physical calculations to optimize battery consumption on mobile devices.
 
 For GPU optimization, the project implements the **Factory Pattern (`MaterialFactory`)**. The engine "freezes" (`freeze()`) unique 3D material instances in VRAM and merely reassigns pointers during level transitions, completely eliminating Garbage Collection overhead and shader compilation stutters.
+
+#### AI-Assisted Code Generation
+
+This is the first SHIFT simulation to incorporate AI-assisted code generation. The 2D raycasting engine that implements Snell's Law was generated through prompts to **Claude Sonnet 4.6 (Anthropic)**, with the developer validating each function against textbook cases.
+
+This workflow contrasts with approaches in which students themselves author simulations via prompts: here, AI generation is applied to a single module within an existing modular codebase built for public distribution, leveraging the architectural patterns established by the previous simulations of the SHIFT series.
+
+---
+
+## 📸 Screenshots
+
+<!-- Add screenshots here when available, e.g.:
+<p align="center">
+  <img src="image/README/screenshot1.png" width="30%" alt="Snell Laser screenshot 1" />
+  <img src="image/README/screenshot2.png" width="30%" alt="Snell Laser screenshot 2" />
+</p>
+-->
 
 ---
 
