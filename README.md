@@ -1,6 +1,6 @@
 # Snell Laser 🚀
 
-[![License: CC BY-ND 4.0](https://img.shields.io/badge/License-CC%20BY--ND%204.0-green.svg)](https://creativecommons.org/licenses/by-nd/4.0/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
 [![Babylon.js](https://img.shields.io/badge/Babylon.js-8.52.0-purple.svg)](https://www.babylonjs.com/)
 [![Vite](https://img.shields.io/badge/Vite-7.3.1-yellow.svg)](https://vitejs.dev/)
@@ -36,7 +36,7 @@ The project serves as an educational tool, visually demonstrating the **Snell-De
 
 * **12 Progressive Levels:** Dynamically loaded from a `JSON` configuration, featuring a learning curve that introduces new optical elements at each stage.
 * **Custom Optical Engine:** Light trajectory and collisions are calculated by a custom-built 2D Raycasting engine, independent of external physics libraries.
-* **Physics-Based Scoring:** Points are awarded for Reflection (x10), Refraction (x20), and a high-value bonus for Total Internal Reflection (x50).
+* **Physics-Based Scoring:** Points are awarded for Reflection (×10), Refraction (×20), and a high-value bonus for Total Internal Reflection (×50).
 * **Skill Rank System:** Total accumulated points grant skill titles, ranging from "Beginner" to "Willebrord Snellius".
 * **Persistence:** Player progress (unlocked levels and high scores) is automatically saved via `localStorage`.
 * **Responsive and Multilingual:** Fully optimized for mobile browsers with native support for English and Portuguese.
@@ -115,7 +115,22 @@ For GPU optimization, the project implements the **Factory Pattern (`MaterialFac
 
 ## 📜 License
 
-This project is licensed under a **Creative Commons Attribution-NoDerivatives 4.0 International License (CC BY-ND 4.0)**. You are free to share, copy, and redistribute the game in any medium or format for any purpose, even commercially, as long as appropriate credit is given to the author and the link to [www.fisicagames.com.br](https://www.fisicagames.com.br) is maintained. You may not distribute modified versions of the source code.
+### Source Code
+
+The source code in this repository is licensed under the **MIT License** — see the [LICENSE](./LICENSE) file.
+
+### Visual Assets
+
+3D models, textures, and original visual content created by the author are licensed under **Creative Commons Attribution 4.0 International (CC BY 4.0)**.
+
+### Audio Assets
+
+Music and sound effects in this project are sourced from [Pixabay](https://pixabay.com/) under the [Pixabay Content License](https://pixabay.com/service/license-summary/), which permits free use including for commercial purposes.
+
+### Third-Party Libraries
+
+* **Babylon.js** — Apache License 2.0
+* **Vite.js** — MIT License
 
 **Copyright © 2026 Rafael João Ribeiro.**
 
@@ -128,24 +143,23 @@ Developed by:
 Federal Institute of Paraná (IFPR)
 [www.fisicagames.com.br](https://www.fisicagames.com.br)
 
+---
 
 ## 📊 Commit Types — Verb Cheat Sheet
 
 This table summarizes the commit types used in the project, along with common verbs to start commit messages following best practices (imperative mood, present tense).
 
-| Type       | Purpose                                                                 | Common verbs (imperative)                |
-|------------|-------------------------------------------------------------------------|------------------------------------------|
-| **feat**   | Introduce a new feature or functionality                                | add, implement, introduce, create        |
-| **fix**    | Fix a bug or incorrect behavior                                         | fix, correct, resolve, prevent           |
-| **perf**   | Improve performance (CPU, GPU, memory, bundle size)                     | optimize, improve, reduce, enhance       |
+| Type         | Purpose                                                              | Common verbs (imperative)                |
+| ------------ | -------------------------------------------------------------------- | ---------------------------------------- |
+| **feat**     | Introduce a new feature or functionality                             | add, implement, introduce, create        |
+| **fix**      | Fix a bug or incorrect behavior                                      | fix, correct, resolve, prevent           |
+| **perf**     | Improve performance (CPU, GPU, memory, bundle size)                  | optimize, improve, reduce, enhance       |
 | **refactor** | Restructure code without changing external behavior                  | refactor, reorganize, simplify, restructure |
-| **style**  | Adjust visual aspects (UI, colors, layout, fonts)                       | adjust, update, tweak, refine            |
-| **docs**   | Documentation updates (README, comments, license)                       | add, update, improve, clarify            |
-| **build**  | Build system, bundler (Vite), dependencies, configuration               | configure, update, adjust, setup         |
-| **chore**  | Maintenance tasks, cleanup, assets, non-functional changes              | clean, remove, update, organize          |
-| **balance**| Gameplay tuning (score system, difficulty, progression)                 | adjust, rebalance, tune, update          |
-
----
+| **style**    | Adjust visual aspects (UI, colors, layout, fonts)                    | adjust, update, tweak, refine            |
+| **docs**     | Documentation updates (README, comments, license)                    | add, update, improve, clarify            |
+| **build**    | Build system, bundler (Vite), dependencies, configuration            | configure, update, adjust, setup         |
+| **chore**    | Maintenance tasks, cleanup, assets, non-functional changes           | clean, remove, update, organize          |
+| **balance**  | Gameplay tuning (score system, difficulty, progression)              | adjust, rebalance, tune, update          |
 
 ### ✅ Examples
 
@@ -158,3 +172,4 @@ style(gui): adjust font styles
 build(vite): configure single bundle output
 chore(release): add v1.1.0 distribution archive
 balance(score): adjust rank thresholds
+```
